@@ -37,6 +37,7 @@
 #define KEY_ENTER '\n'
 #define KEY_CLEAR 'C'
 #define KEY_ERASE 127 // backspace
+#define KEY_COPY_BUFFER 'D'
 #define KEY_EXIT 'X'
 
 // COLORS
@@ -350,6 +351,9 @@ int main() {
 		else if (input == KEY_TO_WORD_PS && ctx.op == OP_NONE) setBits(&ctx, 16, 1);
 		else if (input == KEY_TO_DWORD_PS && ctx.op == OP_NONE) setBits(&ctx, 32, 1);
 		else if (input == KEY_TO_QWORD_PS && ctx.op == OP_NONE) setBits(&ctx, 64, 1);
+
+		// COPY NUMBER TO BUFFER
+		else if (input == KEY_COPY_BUFFER) ctx.buffer = ctx.number;
 
 		// OPERATIONS
 		else if (input == '+') ctx.op = OP_ADD;
