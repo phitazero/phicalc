@@ -13,6 +13,11 @@
 #define OP_SUB 2
 #define OP_MUL 3
 #define OP_DIV 4
+#define OP_AND 5
+#define OP_OR 6
+#define OP_XOR 7
+#define OP_LSH 8
+#define OP_RSH 9
 
 // KEYBINDS
 #define KEY_TO_BYTE 'q'
@@ -158,6 +163,18 @@ void printNumber(Context* ctx, ull number) {
 	printf(C_RESET);
 }
 
+void printOp(Context* ctx) {
+	if (ctx->op == OP_ADD) printf("+");
+	else if (ctx->op == OP_SUB) printf("-");
+	else if (ctx->op == OP_MUL) printf("*");
+	else if (ctx->op == OP_DIV) printf("/");
+	else if (ctx->op == OP_AND) printf("&");
+	else if (ctx->op == OP_OR) printf("|");
+	else if (ctx->op == OP_XOR) printf("^");
+	else if (ctx->op == OP_LSH) printf("<<");
+	else if (ctx->op == OP_RSH) printf(">>");
+}
+
 void print(Context* ctx) {
 	printf("\r\033[K"); // clear the line and return to its beginning
 	printf("[" C_MAGENTA);
@@ -179,9 +196,8 @@ void print(Context* ctx) {
 	if (ctx->op == OP_NONE) return;
 
 	printf(" ");
-
-	char signs[5] = {' ', '+', '-', '*', '/'};
-	printf("%c ", signs[ctx->op]);
+	printOp(ctx);
+	printf(" ");
 
 	printNumber(ctx, ctx->buffer);
 }
@@ -221,6 +237,58 @@ void setBits(Context* ctx, int bits, int preserveSign) {
 		ctx->bits = bits;
 		if (isNegative) negate(ctx, &ctx->number);
 	}
+}
+
+void performOperation(Context* ctx) {
+	if (ctx->op == OP_ADD) ctx->number += ctx->buffer;
+	else if (ctx->op == OP_SUB) ctx->number -= ctx->buffer;
+	else if (ctx->op == OP_MUL) ctx->number *= ctx->buffer;
+	else if (ctx->op == OP_AND) ctx->number &= ctx->buffer;
+	else if (ctx->op == OP_OR) ctx->number |= ctx->buffer;
+	else if (ctx->op == OP_XOR) ctx->number ^= ctx->buffer;
+	else if (ctx->op == OP_DIV) {
+		if (ctx->buffer == 0) return;
+
+		int isResNegative = 0;
+		if (isSignedAndNegative(ctx, ctx->number)) {
+			negate(ctx, &ctx->number);
+			isResNegative ^= 1;
+		}
+		if (isSignedAndNegative(ctx, ctx->buffer)) {
+			negate(ctx, &ctx->buffer);
+			isResNegative ^= 1;
+		}
+
+		ctx->number /= ctx->buffer;
+		if (isResNegative) negate(ctx, &ctx->number);
+	} else if (ctx->op == OP_LSH) {
+		if (isSignedAndNegative(ctx, ctx->buffer)) return;
+
+		if (ctx->buffer >= ctx->bits) ctx->number = 0;
+		else ctx->number <<= ctx->buffer;
+
+	} else if(ctx->op == OP_RSH) {
+		if (isSignedAndNegative(ctx, ctx->buffer)) return;
+
+		if (ctx->buffer >= ctx->bits) {
+			if (!isSignedAndNegative(ctx, ctx->number)) ctx->number = 0;
+			else ctx->number = ALL_ONES;
+			return;
+		}
+		else {
+			int isNegative = isSignedAndNegative(ctx, ctx->number);
+
+			for (int i = 0; i < ctx->buffer; i++) {
+				ctx->number >>= 1;
+				if (isNegative)
+					ctx->number |= (1ull << (ctx->bits - 1));
+			}
+		}
+	}
+
+	ctx->buffer = 0;
+	ctx->op = OP_NONE;
+	truncOverflowing(ctx, &ctx->number);
 }
 
 int main() {
@@ -288,34 +356,15 @@ int main() {
 		else if (input == '-') ctx.op = OP_SUB;
 		else if (input == '*') ctx.op = OP_MUL;
 		else if (input == '/') ctx.op = OP_DIV;
+		else if (input == '&') ctx.op = OP_AND;
+		else if (input == '|') ctx.op = OP_OR;
+		else if (input == '^') ctx.op = OP_XOR;
+		else if (input == '<') ctx.op = OP_LSH;
+		else if (input == '>') ctx.op = OP_RSH;
 		
 		// PERFORM AN OPERATION
-		else if (ctx.op != OP_NONE && input == KEY_ENTER) {
-			if (ctx.op == OP_ADD) ctx.number += ctx.buffer;
-			else if (ctx.op == OP_SUB) ctx.number -= ctx.buffer;
-			else if (ctx.op == OP_MUL) ctx.number *= ctx.buffer;
-			else if (ctx.op == OP_DIV) {
-				if (ctx.buffer == 0) continue;
-
-				int isResNegative = 0;
-
-				if (isSignedAndNegative(&ctx, ctx.number)) {
-					negate(&ctx, &ctx.number);
-					isResNegative ^= 1;
-				}
-				if (isSignedAndNegative(&ctx, ctx.buffer)) {
-					negate(&ctx, &ctx.buffer);
-					isResNegative ^= 1;
-				}
-
-				ctx.number /= ctx.buffer;
-				if (isResNegative) negate(&ctx, &ctx.number);
-			}
-
-			ctx.buffer = 0;
-			ctx.op = OP_NONE;
-			truncOverflowing(&ctx, &ctx.number);
-		}
+		else if (ctx.op != OP_NONE && input == KEY_ENTER)
+			performOperation(&ctx);
 
 		// DIGIT INPUT
 		else if (
