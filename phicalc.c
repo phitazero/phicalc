@@ -38,13 +38,14 @@
 #define KEY_CLEAR 'C'
 #define KEY_ERASE 127 // backspace
 #define KEY_COPY_BUFFER 'D'
+#define KEY_BASE_PLUS 'l'
+#define KEY_BASE_MINUS 'k'
 #define KEY_EXIT 'X'
 
 // COLORS
 #define C_MAGENTA "\033[35m"
 #define C_LMAGENTA "\033[95m"
 #define C_LBLACK "\033[90m"
-#define C_YELLOW "\033[33m"
 #define C_RESET "\033[0m"
 
 #define ALL_ONES 0xFFFFFFFFFFFFFFFF
@@ -90,66 +91,49 @@ int digit2Value(char digit) {
 	else return -1;
 }
 
+// gets digit of the number in a base at the position pos
+// 0'th position - least significant, increases with digit significance
 int getValueAtPosition(ull number, int pos, int base) {
 	for (int i = 0; i < pos; i++) number /= base;
 	return number % base;
 }
 
+// set's all bits overflowing current bitness to 0
+// e. g. (word) 0x123456789ABCDEF0 -> 0x000000000000DEF0
 void truncOverflowing(Context* ctx, ull* number) {
 	if (ctx->bits == 64) return;
 	*number &= ~(ALL_ONES << ctx->bits);
 }
 
+// negation in two's comlement
 void negate(Context* ctx, ull* number) {
 	*number *= -1;
 	truncOverflowing(ctx, number);
 }
 
+// true if the mode is signed and the number is negative, else false
 int isSignedAndNegative(Context* ctx, ull number) {
 	return ctx->isSigned && (number & (1ull << (ctx->bits - 1)));
 }
 
-void printNumberDec(Context* ctx, ull number) {
-	printf(C_LMAGENTA);
-	if (number == 0) {
-		printf("0" C_RESET);
-		return; // further logic relies on the number being non-zero
-	}
-
-	if (isSignedAndNegative(ctx, number)) {
+void printNumber(Context* ctx, ull number) {
+	if (ctx->base == 10 && isSignedAndNegative(ctx, number)) {
 		negate(ctx, &number);
 		printf("-");
 	}
 
-	int n_digits = floor(log10(number));
-	for (int pos = n_digits; pos >= 0; pos--) {
-		char value = getValueAtPosition(number, pos, 10);
-
-		char digit = value2Digit(value);
-		printf("%c", digit);
-		
-		if (ctx->grouping && !(pos % 3) && pos) printf(" ");
-	}
-	printf(C_RESET);
-}
-
-void printNumber(Context* ctx, ull number) {
-	if (ctx->base == 10) {
-		printNumberDec(ctx, number);
-		return;
-	}
-
 	printf(C_LBLACK);
 
-	int n_digits;
+	int n_digits = ceil(ctx->bits * log(2) / log(ctx->base));
+
 	int groupSize;
 	if (ctx->base == 2) {
-		n_digits = ctx->bits;
 		groupSize = 4;
+	} else if (ctx->base == 10) {
+		groupSize = 3;
 	} else if (ctx->base == 16) {
-		n_digits = ctx->bits / 4;
 		groupSize = 2;
-	}
+	} else ctx->grouping = 0;
 
 	for (int pos = n_digits - 1; pos >= 0; pos--) {
 		char value = getValueAtPosition(number, pos, ctx->base);
@@ -164,18 +148,37 @@ void printNumber(Context* ctx, ull number) {
 	printf(C_RESET);
 }
 
-void printOp(Context* ctx) {
-	if (ctx->op == OP_ADD) printf("+");
-	else if (ctx->op == OP_SUB) printf("-");
-	else if (ctx->op == OP_MUL) printf("*");
-	else if (ctx->op == OP_DIV) printf("/");
-	else if (ctx->op == OP_AND) printf("&");
-	else if (ctx->op == OP_OR) printf("|");
-	else if (ctx->op == OP_XOR) printf("^");
-	else if (ctx->op == OP_LSH) printf("<<");
-	else if (ctx->op == OP_RSH) printf(">>");
+void printOp(int op) {
+	if (op == OP_ADD) printf("+");
+	else if (op == OP_SUB) printf("-");
+	else if (op == OP_MUL) printf("*");
+	else if (op == OP_DIV) printf("/");
+	else if (op == OP_AND) printf("&");
+	else if (op == OP_OR) printf("|");
+	else if (op == OP_XOR) printf("^");
+	else if (op == OP_LSH) printf("<<");
+	else if (op == OP_RSH) printf(">>");
 }
 
+void printBase(int base) {
+	if (base == 2) printf("BIN");
+	else if (base == 3) printf("TRN");
+	else if (base == 4) printf("QTR");
+	else if (base == 5) printf("QIN");
+	else if (base == 6) printf("SEN");
+	else if (base == 7) printf("SPT");
+	else if (base == 8) printf("OCT");
+	else if (base == 9) printf("NON");
+	else if (base == 10) printf("DEC");
+	else if (base == 11) printf("UND");
+	else if (base == 12) printf("DUD");
+	else if (base == 13) printf("TRD");
+	else if (base == 14) printf("TDD");
+	else if (base == 15) printf("PND");
+	else if (base == 16) printf("HEX");
+}
+
+// prints the info and the number
 void print(Context* ctx) {
 	printf("\r\033[K"); // clear the line and return to its beginning
 	printf("[" C_MAGENTA);
@@ -184,9 +187,7 @@ void print(Context* ctx) {
 	else if (ctx->bits == 32) printf("DWORD");
 	else if (ctx->bits == 64) printf("QWORD");
 	printf(" ");
-	if (ctx->base == 2) printf("BIN");
-	else if (ctx->base == 10) printf("DEC");
-	else if (ctx->base == 16) printf("HEX");
+	printBase(ctx->base);
 	printf(" ");
 	if (ctx->isSigned) printf("S");
 	else printf("U");
@@ -197,7 +198,7 @@ void print(Context* ctx) {
 	if (ctx->op == OP_NONE) return;
 
 	printf(" ");
-	printOp(ctx);
+	printOp(ctx->op);
 	printf(" ");
 
 	printNumber(ctx, ctx->buffer);
@@ -292,6 +293,14 @@ void performOperation(Context* ctx) {
 	truncOverflowing(ctx, &ctx->number);
 }
 
+void basePlus(Context* ctx) {
+	if (ctx->base < 16) ctx->base++; 
+}
+
+void baseMinus(Context* ctx) {
+	if (ctx->base > 2) ctx->base--; 
+}
+
 int main() {
 	// initialize the context
 	Context ctx;
@@ -316,6 +325,8 @@ int main() {
 		if (input == KEY_TO_BIN) ctx.base = 2;
 		else if (input == KEY_TO_DEC) ctx.base = 10;
 		else if (input == KEY_TO_HEX) ctx.base = 16;
+		else if (input == KEY_BASE_PLUS) basePlus(&ctx);
+		else if (input == KEY_BASE_MINUS) baseMinus(&ctx);
 
 		// SIGN
 		else if (input == KEY_SIGN && ctx.isSigned)
@@ -371,12 +382,9 @@ int main() {
 			performOperation(&ctx);
 
 		// DIGIT INPUT
-		else if (
-			(ctx.base >= 2 && '0' <= input && input <= '1') ||
-			(ctx.base >= 10 && '0' <= input && input <= '9') ||
-			(ctx.base == 16 && 'a' <= input && input <= 'f')
-		) {
+		else if ('0' <= input && input <= '9' || 'a' <= input && input <= 'f') {
 			int value = digit2Value(input);
+			if (value >= ctx.base) continue;
 			if (ctx.op == OP_NONE) addDigit(&ctx, &ctx.number, value);
 			else addDigit(&ctx, &ctx.buffer, value);
 		}
