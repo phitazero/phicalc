@@ -40,6 +40,7 @@
 #define KEY_COPY_BUFFER 'D'
 #define KEY_BASE_PLUS 'l'
 #define KEY_BASE_MINUS 'k'
+#define KEY_LOGARITHM 'L'
 #define KEY_EXIT 'X'
 
 // COLORS
@@ -71,6 +72,7 @@ typedef struct {
 	int isSigned;
 	int op;
 	int grouping;
+	int showLog;
 	ull number;
 	ull buffer;
 } Context;
@@ -191,8 +193,20 @@ void print(Context* ctx) {
 	printf(" ");
 	if (ctx->isSigned) printf("S");
 	else printf("U");
-	printf(C_RESET "]  ");
+	printf(C_RESET "] ");
 	
+	if (ctx->showLog) {
+		int n_bits;
+
+		if (ctx->number == 0) n_bits = 0;
+		else {
+			n_bits = floor(log2(ctx->number)) + 1;
+		}
+
+		printf(C_MAGENTA"(%d bits) "C_RESET, n_bits);
+	}
+
+	printf(" ");
 	printNumber(ctx, ctx->number);
 
 	if (ctx->op == OP_NONE) return;
@@ -311,6 +325,7 @@ int main() {
 	ctx.grouping = 0;
 	ctx.op = OP_NONE;
 	ctx.isSigned = 1;
+	ctx.showLog = 0;
 
 	// initial print
 	print(&ctx);
@@ -335,6 +350,9 @@ int main() {
 
 		// SIGNEDNESS
 		else if (input == KEY_SIGNEDNESS) ctx.isSigned ^= 1;
+
+		// LOGARITHM
+		else if (input == KEY_LOGARITHM) ctx.showLog ^= 1;
 
 		// BACKSPACE
 		else if (input == KEY_ERASE) {
