@@ -394,5 +394,7 @@ int main() {
 
 	} while (input != KEY_EXIT);
 
+	printf("\n");
+
 	return 0;
 }
