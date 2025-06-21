@@ -72,7 +72,7 @@ typedef struct {
 	int isSigned;
 	int op;
 	int grouping;
-	int showLog;
+	int showLogMode;
 	ull number;
 	ull buffer;
 } Context;
@@ -195,7 +195,13 @@ void print(Context* ctx) {
 	else printf("U");
 	printf(C_RESET "] ");
 	
-	if (ctx->showLog) {
+	if (ctx->showLogMode == 1) {
+		float log = log2(ctx->number);
+		log *= 10;
+		log = (float) floor(log);
+		log /= 10;
+		printf(C_MAGENTA"(log2 = %.1f) "C_RESET, log);
+	} else if (ctx->showLogMode == 2) {
 		int n_bits;
 
 		if (ctx->number == 0) n_bits = 0;
@@ -325,7 +331,7 @@ int main() {
 	ctx.grouping = 0;
 	ctx.op = OP_NONE;
 	ctx.isSigned = 1;
-	ctx.showLog = 0;
+	ctx.showLogMode = 0;
 
 	// initial print
 	print(&ctx);
@@ -352,7 +358,10 @@ int main() {
 		else if (input == KEY_SIGNEDNESS) ctx.isSigned ^= 1;
 
 		// LOGARITHM
-		else if (input == KEY_LOGARITHM) ctx.showLog ^= 1;
+		else if (input == KEY_LOGARITHM) {
+			ctx.showLogMode++;
+			ctx.showLogMode %= 3;
+		}
 
 		// BACKSPACE
 		else if (input == KEY_ERASE) {
