@@ -36,6 +36,8 @@
 #define KEY_SIGNEDNESS 'S'
 #define KEY_ENTER '\n'
 #define KEY_CLEAR 'C'
+#define KEY_EXT_CLEAR 'E'
+#define KEY_COPY_EXT2NUM 'D'
 #define KEY_ERASE 127 // backspace
 #define KEY_BASE_PLUS 'l'
 #define KEY_BASE_MINUS 'k'
@@ -49,6 +51,8 @@
 #define C_RESET "\033[0m"
 
 #define ALL_ONES 0xFFFFFFFFFFFFFFFF
+
+extern ull mul128bHiPart(ull* lo, ull n);
 
 int getch() {
 	struct termios oldt, newt;
@@ -74,6 +78,7 @@ typedef struct {
 	int showLogMode;
 	ull number;
 	ull buffer;
+	ull ext;
 } Context;
 
 // convert a numerical value to a digit
@@ -212,6 +217,12 @@ void print(Context* ctx) {
 	}
 
 	printf(" ");
+
+	if (ctx->ext != 0) {
+		printNumber(ctx, ctx->ext);
+		printf(":");
+	}
+
 	printNumber(ctx, ctx->number);
 
 	if (ctx->op == OP_NONE) return;
@@ -263,10 +274,11 @@ void setBits(Context* ctx, int bits, int preserveSign) {
 void performOperation(Context* ctx) {
 	if (ctx->op == OP_ADD) ctx->number += ctx->buffer;
 	else if (ctx->op == OP_SUB) ctx->number -= ctx->buffer;
-	else if (ctx->op == OP_MUL) ctx->number *= ctx->buffer;
 	else if (ctx->op == OP_AND) ctx->number &= ctx->buffer;
 	else if (ctx->op == OP_OR) ctx->number |= ctx->buffer;
 	else if (ctx->op == OP_XOR) ctx->number ^= ctx->buffer;
+	else if (ctx->op == OP_MUL)
+		ctx->ext = mul128bHiPart(&ctx->number, ctx->buffer);
 	else if (ctx->op == OP_DIV) {
 		if (ctx->buffer == 0) return;
 
@@ -325,6 +337,7 @@ int main() {
 	Context ctx;
 	ctx.number = 0;
 	ctx.buffer = 0;
+	ctx.ext = 0;
 	ctx.base = 10;
 	ctx.bits = 32;
 	ctx.grouping = 0;
@@ -378,6 +391,12 @@ int main() {
 
 		// DIGIT GROUPING
 		else if (input == KEY_GROUPING) ctx.grouping ^= 1;
+
+		// CLEAR EXTENSION REGISTER
+		else if (input == KEY_EXT_CLEAR) ctx.ext = 0;
+
+		// COPY EXTENSION REGISTER TO NUMBER REGISTER
+		else if (input == KEY_COPY_EXT2NUM) ctx.number = ctx.ext;
 
 		// BITS
 		else if (input == KEY_TO_BYTE && ctx.op == OP_NONE) setBits(&ctx, 8, 0);
