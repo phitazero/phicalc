@@ -90,28 +90,28 @@ char value2Digit(int value) {
 
 // convert a digit to a numerical value
 // letters for hex are accepted in lowercase, since it's for input
-// for non-digit chars returns -1
+// for non-digit char's returns -1
 int digit2Value(char digit) {
 	if ('0' <= digit && digit <= '9') return digit - '0';
 	else if ('a' <= digit && digit <= 'f') return digit - 'a' + 10;
 	else return -1;
 }
 
-// gets digit of the number in a base at the position pos
+// gets the digit of the number in a base at the position pos
 // 0'th position - least significant, increases with digit significance
 int getValueAtPosition(ull number, int pos, int base) {
 	for (int i = 0; i < pos; i++) number /= base;
 	return number % base;
 }
 
-// set's all bits overflowing current bitness to 0
+// sets all bits overflowing the current bitness to 0
 // e. g. (word) 0x123456789ABCDEF0 -> 0x000000000000DEF0
 void truncOverflowing(Context* ctx, ull* number) {
 	if (ctx->bits == 64) return;
 	*number &= ~(ALL_ONES << ctx->bits);
 }
 
-// negation in two's comlement
+// negation in two's complement
 void negate(Context* ctx, ull* number) {
 	*number *= -1;
 	truncOverflowing(ctx, number);
