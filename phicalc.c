@@ -339,7 +339,7 @@ int main() {
 	char input;
 	do {
 		input = getch();
-		int shouldPrint = 1;
+		int wasUpdated = 1;
 
 		// BASES
 		if (input == KEY_TO_BIN) ctx.base = 2;
@@ -412,8 +412,8 @@ int main() {
 			else addDigit(&ctx, &ctx.buffer, value);
 		}
 
-		else shouldPrint = 0; 
-		if (shouldPrint) print(&ctx);
+		else wasUpdated = 0;
+		if (wasUpdated) print(&ctx);
 
 	} while (input != KEY_EXIT);
 
