@@ -76,9 +76,9 @@ typedef struct {
 	int op;
 	int grouping;
 	int showLogMode;
-	ull number;
-	ull buffer;
-	ull ext;
+	ull mainReg;
+	ull inputReg;
+	ull extReg;
 } Context;
 
 // convert a numerical value to a digit
@@ -184,7 +184,7 @@ void printBase(int base) {
 	else if (base == 16) printf("HEX");
 }
 
-// prints the info and the number
+// prints the info and all numbers
 void print(Context* ctx) {
 	printf("\r\033[K"); // clear the line and return to its beginning
 	printf("[" C_MAGENTA);
@@ -200,7 +200,7 @@ void print(Context* ctx) {
 	printf(C_RESET "] ");
 	
 	if (ctx->showLogMode == 1) {
-		float log = log2(ctx->number);
+		float log = log2(ctx->mainReg);
 		log *= 10;
 		log = (float) floor(log);
 		log /= 10;
@@ -208,9 +208,9 @@ void print(Context* ctx) {
 	} else if (ctx->showLogMode == 2) {
 		int n_bits;
 
-		if (ctx->number == 0) n_bits = 0;
+		if (ctx->mainReg == 0) n_bits = 0;
 		else {
-			n_bits = floor(log2(ctx->number)) + 1;
+			n_bits = floor(log2(ctx->mainReg)) + 1;
 		}
 
 		printf(C_MAGENTA"(%d bits) "C_RESET, n_bits);
@@ -218,12 +218,12 @@ void print(Context* ctx) {
 
 	printf(" ");
 
-	if (ctx->ext != 0) {
-		printNumber(ctx, ctx->ext);
+	if (ctx->extReg != 0) {
+		printNumber(ctx, ctx->extReg);
 		printf(":");
 	}
 
-	printNumber(ctx, ctx->number);
+	printNumber(ctx, ctx->mainReg);
 
 	if (ctx->op == OP_NONE) return;
 
@@ -231,7 +231,7 @@ void print(Context* ctx) {
 	printOp(ctx->op);
 	printf(" ");
 
-	printNumber(ctx, ctx->buffer);
+	printNumber(ctx, ctx->inputReg);
 }
 
 void addDigit(Context* ctx, ull* number, ull digitValue) {
@@ -262,66 +262,66 @@ void eraseDigit(Context* ctx, ull* number) {
 void setBits(Context* ctx, int bits, int preserveSign) {
 	if (!preserveSign) {
 		ctx->bits = bits;
-		truncOverflowing(ctx, &ctx->number);
+		truncOverflowing(ctx, &ctx->mainReg);
 	} else {
-		int isNegative = isSignedAndNegative(ctx, ctx->number);
-		if (isNegative) negate(ctx, &ctx->number);
+		int isNegative = isSignedAndNegative(ctx, ctx->mainReg);
+		if (isNegative) negate(ctx, &ctx->mainReg);
 		ctx->bits = bits;
-		if (isNegative) negate(ctx, &ctx->number);
+		if (isNegative) negate(ctx, &ctx->mainReg);
 	}
 }
 
 void performOperation(Context* ctx) {
-	if (ctx->op == OP_ADD) ctx->number += ctx->buffer;
-	else if (ctx->op == OP_SUB) ctx->number -= ctx->buffer;
-	else if (ctx->op == OP_AND) ctx->number &= ctx->buffer;
-	else if (ctx->op == OP_OR) ctx->number |= ctx->buffer;
-	else if (ctx->op == OP_XOR) ctx->number ^= ctx->buffer;
+	if (ctx->op == OP_ADD) ctx->mainReg += ctx->inputReg;
+	else if (ctx->op == OP_SUB) ctx->mainReg -= ctx->inputReg;
+	else if (ctx->op == OP_AND) ctx->mainReg &= ctx->inputReg;
+	else if (ctx->op == OP_OR) ctx->mainReg |= ctx->inputReg;
+	else if (ctx->op == OP_XOR) ctx->mainReg ^= ctx->inputReg;
 	else if (ctx->op == OP_MUL)
-		ctx->ext = mul128bHiPart(&ctx->number, ctx->buffer);
+		ctx->extReg = mul128bHiPart(&ctx->mainReg, ctx->inputReg);
 	else if (ctx->op == OP_DIV) {
-		if (ctx->buffer == 0) return;
+		if (ctx->inputReg == 0) return;
 
 		int isResNegative = 0;
-		if (isSignedAndNegative(ctx, ctx->number)) {
-			negate(ctx, &ctx->number);
+		if (isSignedAndNegative(ctx, ctx->mainReg)) {
+			negate(ctx, &ctx->mainReg);
 			isResNegative ^= 1;
 		}
-		if (isSignedAndNegative(ctx, ctx->buffer)) {
-			negate(ctx, &ctx->buffer);
+		if (isSignedAndNegative(ctx, ctx->inputReg)) {
+			negate(ctx, &ctx->inputReg);
 			isResNegative ^= 1;
 		}
 
-		ctx->number /= ctx->buffer;
-		if (isResNegative) negate(ctx, &ctx->number);
+		ctx->mainReg /= ctx->inputReg;
+		if (isResNegative) negate(ctx, &ctx->mainReg);
 	} else if (ctx->op == OP_LSH) {
-		if (isSignedAndNegative(ctx, ctx->buffer)) return;
+		if (isSignedAndNegative(ctx, ctx->inputReg)) return;
 
-		if (ctx->buffer >= ctx->bits) ctx->number = 0;
-		else ctx->number <<= ctx->buffer;
+		if (ctx->inputReg >= ctx->bits) ctx->mainReg = 0;
+		else ctx->mainReg <<= ctx->inputReg;
 
 	} else if(ctx->op == OP_RSH) {
-		if (isSignedAndNegative(ctx, ctx->buffer)) return;
+		if (isSignedAndNegative(ctx, ctx->inputReg)) return;
 
-		if (ctx->buffer >= ctx->bits) {
-			if (!isSignedAndNegative(ctx, ctx->number)) ctx->number = 0;
-			else ctx->number = ALL_ONES;
+		if (ctx->inputReg >= ctx->bits) {
+			if (!isSignedAndNegative(ctx, ctx->mainReg)) ctx->mainReg = 0;
+			else ctx->mainReg = ALL_ONES;
 			return;
 		}
 		else {
-			int isNegative = isSignedAndNegative(ctx, ctx->number);
+			int isNegative = isSignedAndNegative(ctx, ctx->mainReg);
 
-			for (int i = 0; i < ctx->buffer; i++) {
-				ctx->number >>= 1;
+			for (int i = 0; i < ctx->inputReg; i++) {
+				ctx->mainReg >>= 1;
 				if (isNegative)
-					ctx->number |= (1ull << (ctx->bits - 1));
+					ctx->mainReg |= (1ull << (ctx->bits - 1));
 			}
 		}
 	}
 
-	ctx->buffer = 0;
+	ctx->inputReg = 0;
 	ctx->op = OP_NONE;
-	truncOverflowing(ctx, &ctx->number);
+	truncOverflowing(ctx, &ctx->mainReg);
 }
 
 void basePlus(Context* ctx) {
@@ -335,9 +335,9 @@ void baseMinus(Context* ctx) {
 int main() {
 	// initialize the context
 	Context ctx;
-	ctx.number = 0;
-	ctx.buffer = 0;
-	ctx.ext = 0;
+	ctx.mainReg = 0;
+	ctx.inputReg = 0;
+	ctx.extReg = 0;
 	ctx.base = 10;
 	ctx.bits = 32;
 	ctx.grouping = 0;
@@ -363,8 +363,8 @@ int main() {
 
 		// SIGN
 		else if (input == KEY_SIGN && ctx.isSigned)
-			if (ctx.op == OP_NONE) negate(&ctx, &ctx.number);
-			else negate(&ctx, &ctx.buffer);
+			if (ctx.op == OP_NONE) negate(&ctx, &ctx.mainReg);
+			else negate(&ctx, &ctx.inputReg);
 
 		// SIGNEDNESS
 		else if (input == KEY_SIGNEDNESS) ctx.isSigned ^= 1;
@@ -377,15 +377,15 @@ int main() {
 
 		// BACKSPACE
 		else if (input == KEY_ERASE) {
-			if (ctx.op == OP_NONE) eraseDigit(&ctx, &ctx.number);
-			else if (ctx.buffer != 0) eraseDigit(&ctx, &ctx.buffer);
+			if (ctx.op == OP_NONE) eraseDigit(&ctx, &ctx.mainReg);
+			else if (ctx.inputReg != 0) eraseDigit(&ctx, &ctx.inputReg);
 			else ctx.op = OP_NONE;
 		}
 
 		// CLEAR
 		else if (input == KEY_CLEAR) {
-			ctx.number = 0;
-			ctx.buffer = 0;
+			ctx.mainReg = 0;
+			ctx.inputReg = 0;
 			ctx.op = OP_NONE;
 		}
 
@@ -393,10 +393,10 @@ int main() {
 		else if (input == KEY_GROUPING) ctx.grouping ^= 1;
 
 		// CLEAR EXTENSION REGISTER
-		else if (input == KEY_EXT_CLEAR) ctx.ext = 0;
+		else if (input == KEY_EXT_CLEAR) ctx.extReg = 0;
 
 		// COPY EXTENSION REGISTER TO NUMBER REGISTER
-		else if (input == KEY_COPY_EXT2NUM) ctx.number = ctx.ext;
+		else if (input == KEY_COPY_EXT2NUM) ctx.mainReg = ctx.extReg;
 
 		// BITS
 		else if (input == KEY_TO_BYTE && ctx.op == OP_NONE) setBits(&ctx, 8, 0);
@@ -427,8 +427,8 @@ int main() {
 		else if ('0' <= input && input <= '9' || 'a' <= input && input <= 'f') {
 			int value = digit2Value(input);
 			if (value >= ctx.base) continue;
-			if (ctx.op == OP_NONE) addDigit(&ctx, &ctx.number, value);
-			else addDigit(&ctx, &ctx.buffer, value);
+			if (ctx.op == OP_NONE) addDigit(&ctx, &ctx.mainReg, value);
+			else addDigit(&ctx, &ctx.inputReg, value);
 		}
 
 		else wasUpdated = 0;
