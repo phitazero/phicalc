@@ -3,9 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-
-// TYPES
-#define ull unsigned long long
+#include <stdint.h>
+#include <stdint.h>
 
 // OPERATIONS
 #define OP_NONE 0
@@ -52,11 +51,11 @@
 
 #define ALL_ONES 0xFFFFFFFFFFFFFFFF
 
-extern ull mul128bHiPart(ull* lo, ull n);
+extern uint64_t mul128bHiPart(uint64_t* lo, uint64_t n);
 
-int getch() {
+char getch() {
 	struct termios oldt, newt;
-	int ch;
+	char ch;
 
 	tcgetattr(STDIN_FILENO, &oldt);         
 	newt = oldt;
@@ -70,20 +69,20 @@ int getch() {
 }
 
 typedef struct {
-	int base;
-	int bits;
-	int isSigned;
-	int op;
-	int grouping;
-	int showLogMode;
-	ull mainReg;
-	ull inputReg;
-	ull extReg;
+	uint8_t base;
+	uint8_t bits;
+	uint8_t isSigned;
+	uint8_t op;
+	uint8_t grouping;
+	uint8_t showLogMode;
+	uint64_t mainReg;
+	uint64_t inputReg;
+	uint64_t extReg;
 } Context;
 
 // convert a numerical value to a digit
 // letters for hex are in uppercase, since it's for display
-char value2Digit(int value) {
+char value2Digit(uint8_t value) {
 	if (value < 10) return '0' + value;
 	else return 'A' - 10 + value;
 }
@@ -91,34 +90,34 @@ char value2Digit(int value) {
 // convert a digit to a numerical value
 // letters for hex are accepted in lowercase, since it's for input
 // for non-digit char's returns -1
-int digit2Value(char digit) {
+uint8_t digit2Value(char digit) {
 	if ('0' <= digit && digit <= '9') return digit - '0';
 	else if ('a' <= digit && digit <= 'f') return digit - 'a' + 10;
 	else return -1;
 }
 
-// gets the digit of the number in a base at the position pos
+// gets thuint8_te digit of the number in a base at the position pos
 // 0'th position - least significant, increases with digit significance
-int getValueAtPosition(ull number, int pos, int base) {
+uint8_t getValueAtPosition(uint64_t number, uint8_t pos, uint8_t base) {
 	for (int i = 0; i < pos; i++) number /= base;
 	return number % base;
 }
 
 // sets all bits overflowing the current bitness to 0
 // e. g. (word) 0x123456789ABCDEF0 -> 0x000000000000DEF0
-void truncOverflowing(Context* ctx, ull* number) {
+void truncOverflowing(Context* ctx, uint64_t* number) {
 	if (ctx->bits == 64) return;
 	*number &= ~(ALL_ONES << ctx->bits);
 }
 
 // negation in two's complement
-void negate(Context* ctx, ull* number) {
+void negate(Context* ctx, uint64_t* number) {
 	*number *= -1;
 	truncOverflowing(ctx, number);
 }
 
 // true if the mode is signed and the number is negative, else false
-int isSignedAndNegative(Context* ctx, ull number) {
+uint8_t isSignedAndNegative(Context* ctx, uint64_t number) {
 	return ctx->isSigned && (number & (1ull << (ctx->bits - 1)));
 }
 
@@ -126,7 +125,7 @@ void clearLine() {
 	printf("\r\033[K");
 }
 
-void printNumber(Context* ctx, ull number) {
+void printNumber(Context* ctx, uint64_t number) {
 	if (ctx->base == 10 && isSignedAndNegative(ctx, number)) {
 		negate(ctx, &number);
 		printf("-");
@@ -134,9 +133,9 @@ void printNumber(Context* ctx, ull number) {
 
 	printf(C_LBLACK);
 
-	int n_digits = ceil(ctx->bits * log(2) / log(ctx->base));
+	uint8_t n_digits = ceil(ctx->bits * log(2) / log(ctx->base));
 
-	int groupSize;
+	uint8_t groupSize;
 	if (ctx->base == 2) {
 		groupSize = 4;
 	} else if (ctx->base == 10) {
@@ -158,7 +157,7 @@ void printNumber(Context* ctx, ull number) {
 	printf(C_RESET);
 }
 
-void printOp(int op) {
+void printOp(uint8_t op) {
 	if (op == OP_ADD) printf("+");
 	else if (op == OP_SUB) printf("-");
 	else if (op == OP_MUL) printf("*");
@@ -170,7 +169,7 @@ void printOp(int op) {
 	else if (op == OP_RSH) printf(">>");
 }
 
-void printBase(int base) {
+void printBase(uint8_t base) {
 	if (base == 2) printf("BIN");
 	else if (base == 3) printf("TRN");
 	else if (base == 4) printf("QTR");
@@ -210,7 +209,7 @@ void print(Context* ctx) {
 		log /= 10;
 		printf(C_MAGENTA"(log2 = %.1f) "C_RESET, log);
 	} else if (ctx->showLogMode == 2) {
-		int n_bits;
+		uint8_t n_bits;
 
 		if (ctx->mainReg == 0) n_bits = 0;
 		else {
@@ -238,12 +237,12 @@ void print(Context* ctx) {
 	printNumber(ctx, ctx->inputReg);
 }
 
-void addDigit(Context* ctx, ull* number, ull digitValue) {
-	int bits = ctx->bits;
+void addDigit(Context* ctx, uint64_t* number, uint64_t digitValue) {
+	uint8_t bits = ctx->bits;
 	// the sign bit doesn't count
 	if (ctx-> base == 10 && ctx->isSigned) bits--;
 
-	ull maxVal;
+	uint64_t maxVal;
 	if (bits == 64) maxVal = ALL_ONES;
 	else maxVal = (1ull << bits) - 1;
 
@@ -253,7 +252,7 @@ void addDigit(Context* ctx, ull* number, ull digitValue) {
 
 }
 
-void eraseDigit(Context* ctx, ull* number) {
+void eraseDigit(Context* ctx, uint64_t* number) {
 	if (isSignedAndNegative(ctx, *number)) {
 		negate(ctx, number);
 		*number /= ctx->base;
@@ -263,12 +262,12 @@ void eraseDigit(Context* ctx, ull* number) {
 	}
 }
 
-void setBits(Context* ctx, int bits, int preserveSign) {
+void setBits(Context* ctx, uint8_t bits, uint8_t preserveSign) {
 	if (!preserveSign) {
 		ctx->bits = bits;
 		truncOverflowing(ctx, &ctx->mainReg);
 	} else {
-		int isNegative = isSignedAndNegative(ctx, ctx->mainReg);
+		uint8_t isNegative = isSignedAndNegative(ctx, ctx->mainReg);
 		if (isNegative) negate(ctx, &ctx->mainReg);
 		ctx->bits = bits;
 		if (isNegative) negate(ctx, &ctx->mainReg);
@@ -286,14 +285,14 @@ void performOperation(Context* ctx) {
 			ctx->extReg = mul128bHiPart(&ctx->mainReg, ctx->inputReg);
 		else {
 			ctx->mainReg *= ctx->inputReg;
-			ull mask = ~(ALL_ONES << (ctx->bits * 2));
+			uint64_t mask = ~(ALL_ONES << (ctx->bits * 2));
 			ctx->extReg = (ctx->mainReg & mask) >> ctx->bits;
 		}
 	}
 	else if (ctx->op == OP_DIV) {
 		if (ctx->inputReg == 0) return;
 
-		int isResNegative = 0;
+		uint8_t isResNegative = 0;
 		if (isSignedAndNegative(ctx, ctx->mainReg)) {
 			negate(ctx, &ctx->mainReg);
 			isResNegative ^= 1;
@@ -320,7 +319,7 @@ void performOperation(Context* ctx) {
 			return;
 		}
 		else {
-			int isNegative = isSignedAndNegative(ctx, ctx->mainReg);
+			uint8_t isNegative = isSignedAndNegative(ctx, ctx->mainReg);
 
 			for (int i = 0; i < ctx->inputReg; i++) {
 				ctx->mainReg >>= 1;
@@ -363,7 +362,7 @@ int main() {
 	char input;
 	do {
 		input = getch();
-		int wasUpdated = 1;
+		uint8_t wasUpdated = 1;
 
 		// BASES
 		if (input == KEY_TO_BIN) ctx.base = 2;
@@ -436,7 +435,7 @@ int main() {
 
 		// DIGIT INPUT
 		else if ('0' <= input && input <= '9' || 'a' <= input && input <= 'f') {
-			int value = digit2Value(input);
+			uint8_t value = digit2Value(input);
 			if (value >= ctx.base) continue;
 			if (ctx.op == OP_NONE) addDigit(&ctx, &ctx.mainReg, value);
 			else addDigit(&ctx, &ctx.inputReg, value);
