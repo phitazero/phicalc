@@ -122,6 +122,10 @@ int isSignedAndNegative(Context* ctx, ull number) {
 	return ctx->isSigned && (number & (1ull << (ctx->bits - 1)));
 }
 
+void clearLine() {
+	printf("\r\033[K");
+}
+
 void printNumber(Context* ctx, ull number) {
 	if (ctx->base == 10 && isSignedAndNegative(ctx, number)) {
 		negate(ctx, &number);
@@ -186,7 +190,7 @@ void printBase(int base) {
 
 // prints the info and all numbers
 void print(Context* ctx) {
-	printf("\r\033[K"); // clear the line and return to its beginning
+	clearLine();
 	printf("[" C_MAGENTA);
 	if (ctx->bits == 8) printf("BYTE");
 	else if (ctx->bits == 16) printf("WORD");
