@@ -281,8 +281,15 @@ void performOperation(Context* ctx) {
 	else if (ctx->op == OP_AND) ctx->mainReg &= ctx->inputReg;
 	else if (ctx->op == OP_OR) ctx->mainReg |= ctx->inputReg;
 	else if (ctx->op == OP_XOR) ctx->mainReg ^= ctx->inputReg;
-	else if (ctx->op == OP_MUL)
-		ctx->extReg = mul128bHiPart(&ctx->mainReg, ctx->inputReg);
+	else if (ctx->op == OP_MUL) {
+		if (ctx->bits == 64)
+			ctx->extReg = mul128bHiPart(&ctx->mainReg, ctx->inputReg);
+		else {
+			ctx->mainReg *= ctx->inputReg;
+			ull mask = ~(ALL_ONES << (ctx->bits * 2));
+			ctx->extReg = (ctx->mainReg & mask) >> ctx->bits;
+		}
+	}
 	else if (ctx->op == OP_DIV) {
 		if (ctx->inputReg == 0) return;
 
