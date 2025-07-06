@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdint.h>
-#include <stdint.h>
+#include "keybinds.h"
 
 // OPERATIONS
 #define OP_NONE 0
@@ -17,31 +17,6 @@
 #define OP_XOR 7
 #define OP_LSH 8
 #define OP_RSH 9
-
-// KEYBINDS
-#define KEY_TO_BYTE 'q'
-#define KEY_TO_WORD 'w'
-#define KEY_TO_DWORD 'r'
-#define KEY_TO_QWORD 't'
-#define KEY_TO_BYTE_PS 'Q' // PS means Preserve Sign
-#define KEY_TO_WORD_PS 'W'
-#define KEY_TO_DWORD_PS 'R'
-#define KEY_TO_QWORD_PS 'T'
-#define KEY_TO_BIN 'i'
-#define KEY_TO_DEC 'o'
-#define KEY_TO_HEX 'p'
-#define KEY_GROUPING ' '
-#define KEY_SIGN 's'
-#define KEY_SIGNEDNESS 'S'
-#define KEY_ENTER '\n'
-#define KEY_CLEAR 'C'
-#define KEY_EXT_CLEAR 'E'
-#define KEY_COPY_EXT2NUM 'D'
-#define KEY_ERASE 127 // backspace
-#define KEY_BASE_PLUS 'l'
-#define KEY_BASE_MINUS 'k'
-#define KEY_LOGARITHM 'L'
-#define KEY_EXIT 'X'
 
 // COLORS
 #define C_MAGENTA "\033[35m"

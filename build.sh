@@ -5,7 +5,7 @@ if ! which nasm > /dev/null 2>&1; then
 	exit 1
 fi
 
-if ! ls phicalc.c utils.asm > /dev/null 2>&1; then
+if ! ls phicalc.c utils.asm keybinds.h > /dev/null; then
 	echo "not all source files are found"
 	exit 2
 fi
