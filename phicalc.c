@@ -51,7 +51,10 @@
 
 #define ALL_ONES 0xFFFFFFFFFFFFFFFF
 
-extern uint64_t mul128bHiPart(uint64_t* lo, uint64_t n);
+extern void mulBB(uint64_t* io_lo, uint64_t* o_hi, uint64_t n, uint8_t isSigned);
+extern void mulWW(uint64_t* io_lo, uint64_t* o_hi, uint64_t n, uint8_t isSigned);
+extern void mulDD(uint64_t* io_lo, uint64_t* o_hi, uint64_t n, uint8_t isSigned);
+extern void mulQQ(uint64_t* io_lo, uint64_t* o_hi, uint64_t n, uint8_t isSigned);
 
 char getch() {
 	struct termios oldt, newt;
@@ -281,13 +284,14 @@ void performOperation(Context* ctx) {
 	else if (ctx->op == OP_OR) ctx->mainReg |= ctx->inputReg;
 	else if (ctx->op == OP_XOR) ctx->mainReg ^= ctx->inputReg;
 	else if (ctx->op == OP_MUL) {
-		if (ctx->bits == 64)
-			ctx->extReg = mul128bHiPart(&ctx->mainReg, ctx->inputReg);
-		else {
-			ctx->mainReg *= ctx->inputReg;
-			uint64_t mask = ~(ALL_ONES << (ctx->bits * 2));
-			ctx->extReg = (ctx->mainReg & mask) >> ctx->bits;
-		}
+		if (ctx->bits == 8)
+			mulBB(&ctx->mainReg, &ctx->extReg, ctx->inputReg, ctx->isSigned);
+		else if (ctx->bits == 16)
+			mulWW(&ctx->mainReg, &ctx->extReg, ctx->inputReg, ctx->isSigned);
+		else if (ctx->bits == 32)
+			mulDD(&ctx->mainReg, &ctx->extReg, ctx->inputReg, ctx->isSigned);
+		else
+			mulQQ(&ctx->mainReg, &ctx->extReg, ctx->inputReg, ctx->isSigned);
 	}
 	else if (ctx->op == OP_DIV) {
 		if (ctx->inputReg == 0) return;
