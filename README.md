@@ -32,6 +32,8 @@ Optionally you can edit `keybinds.json` before building.
 Note: The build script does not validate `keybinds.json`, so edit it carefully.
 
 ## Usage
+Run with the `-h` or `--help` flag to get current keybinds.
+
 ### Registers
 Registers (or `regs`) - integer variables of different purposes. Have variable size, here referred to as 'bitness'.
 

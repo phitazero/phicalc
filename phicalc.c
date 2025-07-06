@@ -1,7 +1,7 @@
 #include <termios.h>
 #include <unistd.h>
 #include <stdio.h>
-#include <stdlib.h>
+#include <string.h>
 #include <math.h>
 #include <stdint.h>
 #include "keybinds_temp.h"
@@ -325,7 +325,19 @@ void baseMinus(Context* ctx) {
 	if (ctx->base > 2) ctx->base--; 
 }
 
-int main() {
+void printHelp() {
+	printf("More information on https://github.com/phitazero/phicalc\n\nKeybinds:\n");
+	printKeybinds(); // from keybinds_temp.h
+}
+
+int main(int argc, char* argv[]) {
+	// if -h or --help is passed
+	if (argc >= 2 && !(strcmp(argv[1], "-h") && strcmp(argv[1], "--help"))) {
+		printHelp();
+		return 0;
+	}
+
+
 	// initialize the context
 	Context ctx;
 	ctx.mainReg = 0;
