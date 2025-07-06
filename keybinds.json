@@ -16,7 +16,7 @@
 	"KEY_SIGN": {"key": "s", "desc": "Toggle sign"},
 	"KEY_SIGNEDNESS": {"key": "S", "desc": "Toggle signedness"},
 	"KEY_ENTER": {"key": "\\n", "desc": "Perform entered arithmetical or logical operation", "alias": "enter"},
-	"KEY_CLEAR": {"key": "C", "desc": "Set the main and input registers to zero, clear the entered operation"},
+	"KEY_CLEAR": {"key": "C", "desc": "Set all register to zero, clear the entered operation"},
 	"KEY_EXT_CLEAR": {"key": "E", "desc": "Set the extension register to zero"},
 	"KEY_COPY_EXT2NUM": {"key": "D", "desc": "Copy the extension register to the main register"},
 	"KEY_ERASE": {"key": 127, "desc": "Erase a digit", "alias": "backspace"},

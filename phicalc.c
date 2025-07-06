@@ -379,6 +379,7 @@ int main() {
 		else if (input == KEY_CLEAR) {
 			ctx.mainReg = 0;
 			ctx.inputReg = 0;
+			ctx.extReg = 0;
 			ctx.op = OP_NONE;
 		}
 
