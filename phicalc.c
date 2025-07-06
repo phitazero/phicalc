@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdint.h>
-#include "keybinds.h"
+#include "keybinds_temp.h"
 
 // OPERATIONS
 #define OP_NONE 0
