@@ -242,6 +242,10 @@ void eraseDigit(Context* ctx, uint64_t* number) {
 
 void setBits(Context* ctx, uint8_t bits, uint8_t preserveSign) {
 	if (!preserveSign) {
+		if (bits > ctx->bits) {
+			ctx->mainReg |= ctx->extReg << ctx->bits;
+			ctx->extReg = 0;
+		}
 		ctx->bits = bits;
 		truncOverflowing(ctx, &ctx->mainReg);
 	} else {
