@@ -4,9 +4,9 @@
 
 ## Requirements
 - Linux
-- GCC
+- GCC or Clang
 - NASM
-- Python 3 (to build, optional for masochists)
+- Python 3 (to build)
 
 ## Features
 - Integer-only arithmetic and bitwise operations
@@ -27,8 +27,8 @@ or this:
 ```bash
 python3 build.py
 ```
-You can add the -t flag to keep all temporary files. 
-Optionally you can edit `keybinds.json` before building.
+You can add the -t flag to keep all temporary files.  
+Optionally you can edit `keybinds.json` before building.  
 Note: The build script does not validate `keybinds.json`, so edit it carefully.
 
 ## Usage
@@ -41,7 +41,7 @@ Main register (`main reg`) - always shown, stores the results of all operations 
 
 Input register (`input reg`) - shown when an operation is selected. If shown, numbers are entered into the `input reg`.
 
-Extension register (`ext reg`) - shown only when non-zero. The higher part of the product of a multiplication is put into the `ext reg`.
+Extension register (`ext reg`) - shown only when non-zero. The higher part of the product of a multiplication is put into the `ext reg`. When the bitness is increased the `ext reg` gets merged with the `main reg`
 
 ### Operations
 An operation is selected by pressing the corresponding key. When an operation is selected the `input reg` will appear.
