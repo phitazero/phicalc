@@ -231,7 +231,7 @@ void addDigit(Context* ctx, uint64_t* number, uint64_t digitValue) {
 }
 
 void eraseDigit(Context* ctx, uint64_t* number) {
-	if (isSignedAndNegative(ctx, *number)) {
+	if (ctx->base == 10 && isSignedAndNegative(ctx, *number)) {
 		negate(ctx, number);
 		*number /= ctx->base;
 		negate(ctx, number);
