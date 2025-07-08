@@ -16,12 +16,32 @@ def isInstalled(prog):
 	return found
 
 if not isInstalled("nasm"):
-	print("fatal: nasm not found")
+	print("Fatal: nasm not found")
 	exit(1)
 
-if not isInstalled("gcc"):
-	print("fatal: gcc not found")
+gccInstalled = isInstalled("gcc")
+clangInstalled = isInstalled("clang")
+
+if not (gccInstalled or clangInstalled):
+	print("Fatal: no compiler for C found, install gcc or clang")
 	exit(2)
+
+elif gccInstalled and not clangInstalled:
+	print("Using gcc")
+	compiler = "gcc"
+elif not gccInstalled and clangInstalled:
+	print("Using clang")
+	compiler = "clang"
+elif "gcc" in argv:
+	print("Using gcc")
+	compiler = "gcc"
+elif "clang" in argv:
+	print("Using clang")
+	compiler = "clang"
+else:
+	print("Pass 'gcc' or 'clang' to select a compiler")
+	exit(4)
+
 
 print("Checking sources... ", end="")
 
@@ -33,7 +53,7 @@ sourcesFound = Popen(
 print("Found" if sourcesFound else "Not found")
 
 if not sourcesFound:
-	print("fatal: not all source files are found")
+	print("Fatal: not all source files are found")
 	exit(3)
 
 print("Parsing keybinds...")
@@ -64,7 +84,7 @@ open("keybinds_temp.h", "w").write(codeTemplate.format(definitions, helpText))
 print("Assembling utils.asm...")
 run(("nasm", "utils.asm", "-f", "elf64", "-o", "utils.o"))
 print("Compiling phicalc.c, linking with utils.o...")
-run(("gcc", "phicalc.c", "utils.o", "-o", "phicalc", "-lm", "-O2"))
+run((compiler, "phicalc.c", "utils.o", "-o", "phicalc", "-lm", "-O2"))
 
 if "-t" not in argv:
 	print("Cleaning up...")
