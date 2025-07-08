@@ -220,13 +220,24 @@ void addDigit(Context* ctx, uint64_t* number, uint64_t digitValue) {
 	// the sign bit doesn't count
 	if (ctx-> base == 10 && ctx->isSigned) bits--;
 
+	uint8_t wasNegated = 0;
+	if (ctx-> base == 10 && isSignedAndNegative(ctx, *number)) {
+		negate(ctx, number);
+		wasNegated = 1;
+	}
+
 	uint64_t maxVal;
 	if (bits == 64) maxVal = ALL_ONES;
 	else maxVal = (1ull << bits) - 1;
 
-	if (*number > (maxVal - digitValue) / ctx->base) return; // overflow will occur
+	if (*number > (maxVal - digitValue) / ctx->base) { // overflow will occur
+		negate(ctx, number);
+		return;
+	}
 
 	*number = *number * ctx->base + digitValue;
+
+	if (wasNegated) negate(ctx, number);
 
 }
 
