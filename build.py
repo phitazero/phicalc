@@ -46,7 +46,7 @@ else:
 print("Checking sources... ", end="")
 
 sourcesFound = Popen(
-	("ls", "phicalc.c", "intmath.h", "utils.asm", "keybinds.json"),
+	("ls", "phicalc.c", "intmath.h", "math.asm", "keybinds.json"),
 	stdout=DEVNULL
 ).wait() == 0
 
@@ -81,13 +81,13 @@ void printKeybinds() {{
 print("Creating keybinds_temp.h...")
 open("keybinds_temp.h", "w").write(codeTemplate.format(definitions, helpText))
 
-print("Assembling utils.asm...")
-run(("nasm", "utils.asm", "-f", "elf64", "-o", "utils.o"))
-print("Compiling phicalc.c, linking with utils.o...")
-run((compiler, "phicalc.c", "utils.o", "-o", "phicalc", "-lm", "-O2"))
+print("Assembling math.asm...")
+run(("nasm", "math.asm", "-f", "elf64", "-o", "math.o"))
+print("Compiling phicalc.c, linking with math.o...")
+run((compiler, "phicalc.c", "math.o", "-o", "phicalc", "-lm", "-O2"))
 
 if "-t" not in argv:
 	print("Cleaning up...")
-	run(("rm", "utils.o", "keybinds_temp.h"))
+	run(("rm", "math.o", "keybinds_temp.h"))
 
 print("Success")
