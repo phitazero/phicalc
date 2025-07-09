@@ -264,11 +264,16 @@ void setBits(Context* ctx, uint8_t bits, uint8_t preserveSign) {
 }
 
 void performOperation(Context* ctx) {
-	if (ctx->op == OP_ADD) ctx->mainReg += ctx->inputReg;
-	else if (ctx->op == OP_SUB) ctx->mainReg -= ctx->inputReg;
-	else if (ctx->op == OP_AND) ctx->mainReg &= ctx->inputReg;
-	else if (ctx->op == OP_OR) ctx->mainReg |= ctx->inputReg;
-	else if (ctx->op == OP_XOR) ctx->mainReg ^= ctx->inputReg;
+	if (ctx->op == OP_ADD)
+		intmath_add(&ctx->mainReg, ctx->inputReg, ctx->bits);
+	else if (ctx->op == OP_SUB)
+		intmath_sub(&ctx->mainReg, ctx->inputReg, ctx->bits);
+	else if (ctx->op == OP_AND)
+		intmath_and(&ctx->mainReg, ctx->inputReg, ctx->bits);
+	else if (ctx->op == OP_OR)
+		intmath_or(&ctx->mainReg, ctx->inputReg, ctx->bits);
+	else if (ctx->op == OP_XOR)
+		intmath_sub(&ctx->mainReg, ctx->inputReg, ctx->bits);
 	else if (ctx->op == OP_MUL)
 		intmath_mul(&ctx->mainReg,
 			&ctx->extReg,
@@ -283,28 +288,12 @@ void performOperation(Context* ctx) {
 			ctx->isSigned,
 			ctx->bits);
 	} else if (ctx->op == OP_LSH) {
-		if (isSignedAndNegative(ctx, ctx->inputReg)) return;
-
 		if (ctx->inputReg >= ctx->bits) ctx->mainReg = 0;
-		else ctx->mainReg <<= ctx->inputReg;
+		else intmath_lsh(&ctx->mainReg, ctx->inputReg, ctx->bits);
 
 	} else if(ctx->op == OP_RSH) {
-		if (isSignedAndNegative(ctx, ctx->inputReg)) return;
-
-		if (ctx->inputReg >= ctx->bits) {
-			if (!isSignedAndNegative(ctx, ctx->mainReg)) ctx->mainReg = 0;
-			else ctx->mainReg = ALL_ONES;
-			return;
-		}
-		else {
-			uint8_t isNegative = isSignedAndNegative(ctx, ctx->mainReg);
-
-			for (int i = 0; i < ctx->inputReg; i++) {
-				ctx->mainReg >>= 1;
-				if (isNegative)
-					ctx->mainReg |= (1ull << (ctx->bits - 1));
-			}
-		}
+		if (ctx->inputReg >= ctx->bits) ctx->mainReg = 0;
+		else intmath_rsh(&ctx->mainReg, ctx->inputReg, ctx->isSigned, ctx->bits);
 	}
 
 	ctx->inputReg = 0;

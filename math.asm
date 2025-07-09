@@ -1,5 +1,51 @@
 section .text
 
+
+global addBB
+addBB:                  ; passed: &mainReg, inputReg
+	add [rdi], sil      ; mainReg += inputReg
+	ret
+
+global addWW
+addWW:                  ; passed: &mainReg, inputReg
+	add [rdi], si       ; mainReg += inputReg
+	ret
+
+global addDD
+addDD:                  ; passed: &mainReg, inputReg
+	add [rdi], esi      ; mainReg += inputReg
+	ret
+
+global addQQ
+addQQ:                  ; passed: &mainReg, inputReg
+	add [rdi], rsi      ; mainReg += inputReg
+	ret
+
+
+
+global subBB
+subBB:                  ; passed: &mainReg, inputReg
+	sub [rdi], sil      ; mainReg -= inputReg
+	ret
+
+global subWW
+subWW:                  ; passed: &mainReg, inputReg
+	sub [rdi], si       ; mainReg -= inputReg
+	ret
+
+global subDD
+subDD:                  ; passed: &mainReg, inputReg
+	sub [rdi], esi      ; mainReg -= inputReg
+	ret
+
+global subQQ
+subQQ:                  ; passed: &mainReg, inputReg
+	sub [rdi], rsi      ; mainReg -= inputReg
+	ret
+
+
+
+
 global mulBB
 mulBB:                  ; passed: &lo, &hi, n, isSigned
 	mov al, [rdi]       ; al = lo
@@ -68,6 +114,8 @@ mulQQ:                  ; passed: &lo, &hi, n, isSigned
 	mov [rdi], rax      ; lo = rax
 	mov [rsi], rdx      ; hi = rdx
 	ret
+
+
 
 global divBB
 divBB:                  ; passed: &lo, &hi, n, isSigned
@@ -146,4 +194,149 @@ divQQ:                  ; passed: &lo, &hi, n, isSigned
 
 	mov [rdi], rax      ; lo = rax (quotient)
 	mov [rsi], rdx      ; hi = rdx (remainder)
+	ret
+
+
+
+global andBB
+andBB:                  ; passed: &mainReg, inputReg
+	and [rdi], sil      ; mainReg &= inputReg
+	ret
+
+global andWW
+andWW:                  ; passed: &mainReg, inputReg
+	and [rdi], si       ; mainReg &= inputReg
+	ret
+
+global andDD
+andDD:                  ; passed: &mainReg, inputReg
+	and [rdi], esi      ; mainReg &= inputReg
+	ret
+
+global andQQ
+andQQ:                  ; passed: &mainReg, inputReg
+	and [rdi], rsi      ; mainReg &= inputReg
+	ret
+
+
+
+global orBB
+orBB:                   ; passed: &mainReg, inputReg
+	or [rdi], sil       ; mainReg |= inputReg
+	ret
+
+global orWW
+orWW:                   ; passed: &mainReg, inputReg
+	or [rdi], si        ; mainReg |= inputReg
+	ret
+
+global orDD
+orDD:                   ; passed: &mainReg, inputReg
+	or [rdi], esi       ; mainReg |= inputReg
+	ret
+
+global orQQ
+orQQ:                   ; passed: &mainReg, inputReg
+	or [rdi], rsi       ; mainReg |= inputReg
+	ret
+
+
+
+global xorBB
+xorBB:                  ; passed: &mainReg, inputReg
+	xor [rdi], sil      ; mainReg ^= inputReg
+	ret
+
+global xorWW
+xorWW:                  ; passed: &mainReg, inputReg
+	xor [rdi], si       ; mainReg ^= inputReg
+	ret
+
+global xorDD
+xorDD:                  ; passed: &mainReg, inputReg
+	xor [rdi], esi      ; mainReg ^= inputReg
+	ret
+
+global xorQQ
+xorQQ:                  ; passed: &mainReg, inputReg
+	xor [rdi], rsi      ; mainReg ^= inputReg
+	ret
+
+
+
+global shlBB
+shlBB:                  ; passed: &mainReg, n
+	mov cl, sil         ; cl = n
+	shl byte [rdi], cl  ; mainReg <<= n
+	ret
+
+global shlWW
+shlWW:                  ; passed: &mainReg, n
+	mov cl, sil         ; cl = n
+	shl word [rdi], cl  ; mainReg <<= n
+	ret
+
+global shlDD
+shlDD:                  ; passed: &mainReg, n
+	mov cl, sil         ; cl = n
+	shl dword [rdi], cl ; mainReg <<= n
+	ret
+
+global shlQQ
+shlQQ:                  ; passed: &mainReg, n
+	mov cl, sil         ; cl = n
+	shl qword [rdi], cl ; mainReg <<= n
+	ret
+
+
+
+
+global shrBB
+shrBB:                  ; passed: &mainReg, n
+	mov cl, sil         ; cl = n
+	shr byte [rdi], cl  ; mainReg >>= n (logical)
+	ret
+
+global shrWW
+shrWW:                  ; passed: &mainReg, n
+	mov cl, sil         ; cl = n
+	shr word [rdi], cl  ; mainReg >>= n (logical)
+	ret
+
+global shrDD
+shrDD:                  ; passed: &mainReg, n
+	mov cl, sil         ; cl = n
+	shr dword [rdi], cl ; mainReg >>= n (logical)
+	ret
+
+global shrQQ
+shrQQ:                  ; passed: &mainReg, n
+	mov cl, sil         ; cl = n
+	shr qword [rdi], cl ; mainReg >>= n (logical)
+	ret
+
+
+
+global sarBB
+sarBB:                  ; passed: &mainReg, n
+	mov cl, sil         ; cl = n
+	sar byte [rdi], cl  ; mainReg >>= n (arithmetic)
+	ret
+
+global sarWW
+sarWW:                  ; passed: &mainReg, n
+	mov cl, sil         ; cl = n
+	sar word [rdi], cl  ; mainReg >>= n (arithmetic)
+	ret
+
+global sarDD
+sarDD:                  ; passed: &mainReg, n
+	mov cl, sil         ; cl = n
+	sar dword [rdi], cl ; mainReg >>= n (arithmetic)
+	ret
+
+global sarQQ
+sarQQ:                  ; passed: &mainReg, n
+	mov cl, sil         ; cl = n
+	sar qword [rdi], cl ; mainReg >>= n (arithmetic)
 	ret
