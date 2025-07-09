@@ -46,7 +46,7 @@ else:
 print("Checking sources... ", end="")
 
 sourcesFound = Popen(
-	("ls", "phicalc.c", "utils.asm", "keybinds.json"),
+	("ls", "phicalc.c", "intmath.h", "utils.asm", "keybinds.json"),
 	stdout=DEVNULL
 ).wait() == 0
 

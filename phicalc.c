@@ -5,6 +5,7 @@
 #include <math.h>
 #include <stdint.h>
 #include "keybinds_temp.h"
+#include "intmath.h"
 
 // OPERATIONS
 #define OP_NONE 0
@@ -25,15 +26,6 @@
 #define C_RESET "\033[0m"
 
 #define ALL_ONES 0xFFFFFFFFFFFFFFFF
-
-extern void mulBB(uint64_t* io_lo, uint64_t* o_hi, uint64_t n, uint8_t isSigned);
-extern void mulWW(uint64_t* io_lo, uint64_t* o_hi, uint64_t n, uint8_t isSigned);
-extern void mulDD(uint64_t* io_lo, uint64_t* o_hi, uint64_t n, uint8_t isSigned);
-extern void mulQQ(uint64_t* io_lo, uint64_t* o_hi, uint64_t n, uint8_t isSigned);
-extern void divBB(uint64_t* io_lo, uint64_t* o_hi, uint64_t n, uint8_t isSigned);
-extern void divWW(uint64_t* io_lo, uint64_t* o_hi, uint64_t n, uint8_t isSigned);
-extern void divDD(uint64_t* io_lo, uint64_t* o_hi, uint64_t n, uint8_t isSigned);
-extern void divQQ(uint64_t* io_lo, uint64_t* o_hi, uint64_t n, uint8_t isSigned);
 
 char getch() {
 	struct termios oldt, newt;
@@ -277,26 +269,19 @@ void performOperation(Context* ctx) {
 	else if (ctx->op == OP_AND) ctx->mainReg &= ctx->inputReg;
 	else if (ctx->op == OP_OR) ctx->mainReg |= ctx->inputReg;
 	else if (ctx->op == OP_XOR) ctx->mainReg ^= ctx->inputReg;
-	else if (ctx->op == OP_MUL) {
-		if (ctx->bits == 8)
-			mulBB(&ctx->mainReg, &ctx->extReg, ctx->inputReg, ctx->isSigned);
-		else if (ctx->bits == 16)
-			mulWW(&ctx->mainReg, &ctx->extReg, ctx->inputReg, ctx->isSigned);
-		else if (ctx->bits == 32)
-			mulDD(&ctx->mainReg, &ctx->extReg, ctx->inputReg, ctx->isSigned);
-		else
-			mulQQ(&ctx->mainReg, &ctx->extReg, ctx->inputReg, ctx->isSigned);
-	}
+	else if (ctx->op == OP_MUL)
+		intmath_mul(&ctx->mainReg,
+			&ctx->extReg,
+			ctx->inputReg,
+			ctx->isSigned,
+			ctx->bits);
 	else if (ctx->op == OP_DIV) {
 		if (ctx->inputReg == 0) return;
-		if (ctx->bits == 8)
-			divBB(&ctx->mainReg, &ctx->extReg, ctx->inputReg, ctx->isSigned);
-		else if (ctx->bits == 16)
-			divWW(&ctx->mainReg, &ctx->extReg, ctx->inputReg, ctx->isSigned);
-		else if (ctx->bits == 32)
-			divDD(&ctx->mainReg, &ctx->extReg, ctx->inputReg, ctx->isSigned);
-		else
-			divQQ(&ctx->mainReg, &ctx->extReg, ctx->inputReg, ctx->isSigned);
+		intmath_div(&ctx->mainReg,
+			&ctx->extReg,
+			ctx->inputReg,
+			ctx->isSigned,
+			ctx->bits);
 	} else if (ctx->op == OP_LSH) {
 		if (isSignedAndNegative(ctx, ctx->inputReg)) return;
 
