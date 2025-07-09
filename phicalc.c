@@ -227,7 +227,7 @@ void addDigit(Context* ctx, uint64_t* number, uint64_t digitValue) {
 	else maxVal = (1ull << bits) - 1;
 
 	if (*number > (maxVal - digitValue) / ctx->base) { // overflow will occur
-		negate(ctx, number);
+		if (wasNegated) negate(ctx, number);
 		return;
 	}
 
