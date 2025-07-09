@@ -30,6 +30,10 @@ extern void mulBB(uint64_t* io_lo, uint64_t* o_hi, uint64_t n, uint8_t isSigned)
 extern void mulWW(uint64_t* io_lo, uint64_t* o_hi, uint64_t n, uint8_t isSigned);
 extern void mulDD(uint64_t* io_lo, uint64_t* o_hi, uint64_t n, uint8_t isSigned);
 extern void mulQQ(uint64_t* io_lo, uint64_t* o_hi, uint64_t n, uint8_t isSigned);
+extern void divBB(uint64_t* io_lo, uint64_t* o_hi, uint64_t n, uint8_t isSigned);
+extern void divWW(uint64_t* io_lo, uint64_t* o_hi, uint64_t n, uint8_t isSigned);
+extern void divDD(uint64_t* io_lo, uint64_t* o_hi, uint64_t n, uint8_t isSigned);
+extern void divQQ(uint64_t* io_lo, uint64_t* o_hi, uint64_t n, uint8_t isSigned);
 
 char getch() {
 	struct termios oldt, newt;
@@ -285,19 +289,14 @@ void performOperation(Context* ctx) {
 	}
 	else if (ctx->op == OP_DIV) {
 		if (ctx->inputReg == 0) return;
-
-		uint8_t isResNegative = 0;
-		if (isSignedAndNegative(ctx, ctx->mainReg)) {
-			negate(ctx, &ctx->mainReg);
-			isResNegative ^= 1;
-		}
-		if (isSignedAndNegative(ctx, ctx->inputReg)) {
-			negate(ctx, &ctx->inputReg);
-			isResNegative ^= 1;
-		}
-
-		ctx->mainReg /= ctx->inputReg;
-		if (isResNegative) negate(ctx, &ctx->mainReg);
+		if (ctx->bits == 8)
+			divBB(&ctx->mainReg, &ctx->extReg, ctx->inputReg, ctx->isSigned);
+		else if (ctx->bits == 16)
+			divWW(&ctx->mainReg, &ctx->extReg, ctx->inputReg, ctx->isSigned);
+		else if (ctx->bits == 32)
+			divDD(&ctx->mainReg, &ctx->extReg, ctx->inputReg, ctx->isSigned);
+		else
+			divQQ(&ctx->mainReg, &ctx->extReg, ctx->inputReg, ctx->isSigned);
 	} else if (ctx->op == OP_LSH) {
 		if (isSignedAndNegative(ctx, ctx->inputReg)) return;
 
