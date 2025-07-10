@@ -287,14 +287,10 @@ void performOperation(Context* ctx) {
 			ctx->inputReg,
 			ctx->isSigned,
 			ctx->bits);
-	} else if (ctx->op == OP_LSH) {
-		if (ctx->inputReg >= ctx->bits) ctx->mainReg = 0;
-		else intmath_lsh(&ctx->mainReg, ctx->inputReg, ctx->bits);
-
-	} else if(ctx->op == OP_RSH) {
-		if (ctx->inputReg >= ctx->bits) ctx->mainReg = 0;
-		else intmath_rsh(&ctx->mainReg, ctx->inputReg, ctx->isSigned, ctx->bits);
-	}
+	} else if (ctx->op == OP_LSH)
+		intmath_lsh(&ctx->mainReg, ctx->inputReg, ctx->bits);
+	else if(ctx->op == OP_RSH)
+		intmath_rsh(&ctx->mainReg, ctx->inputReg, ctx->isSigned, ctx->bits);
 
 	ctx->inputReg = 0;
 	ctx->op = OP_NONE;
