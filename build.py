@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
 
-from subprocess import run, Popen, DEVNULL
+from subprocess import Popen, DEVNULL
 from sys import argv
 import json
+
+def run(cmd):
+	retcode = Popen(cmd).wait()
+	if retcode != 0:
+		print(f"{cmd[0]} exited with code {retcode}")
+		exit(retcode)
 
 def isInstalled(prog):
 	print(f"Checking {prog}... ", end="")
@@ -84,7 +90,7 @@ open("keybinds_temp.h", "w").write(codeTemplate.format(definitions, helpText))
 print("Assembling math.asm...")
 run(("nasm", "math.asm", "-f", "elf64", "-o", "math.o"))
 print("Compiling phicalc.c, linking with math.o...")
-run((compiler, "phicalc.c", "math.o", "-o", "phicalc", "-lm", "-O2"))
+run((compiler, "phicalc.c", "math.o", "-o", "phicalc", "-lm", "-O2", "-Wall"))
 
 if "-t" not in argv:
 	print("Cleaning up...")
