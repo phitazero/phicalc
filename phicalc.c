@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include "keybinds_temp.h"
 #include "intmath.h"
+#include "flags.h"
 
 // OPERATIONS
 #define OP_NONE 0
@@ -52,6 +53,7 @@ typedef struct {
 	uint64_t mainReg;
 	uint64_t inputReg;
 	uint64_t extReg;
+	Flags* flags;
 } Context;
 
 // convert a numerical value to a digit
@@ -97,6 +99,28 @@ uint8_t isSignedAndNegative(Context* ctx, uint64_t number) {
 
 void clearLine() {
 	printf("\r\033[K");
+}
+
+void printFlag(int8_t value, char flagLetter) {
+	if (value == 1) printf(C_LMAGENTA);
+	else printf(C_LBLACK);
+
+	if (value != -1) printf("%c", flagLetter);
+	else printf("-");
+}
+
+void printFlags(Flags* flags) {
+	printFlag(flags->sf, 'S');
+	printFlag(flags->zf, 'Z');
+	printFlag(flags->cf, 'C');
+	printFlag(flags->of, 'O');
+}
+
+void clearFlags(Flags* flags) {
+	flags->sf = -1;
+	flags->zf = -1;
+	flags->cf = -1;
+	flags->of = -1;
 }
 
 void printNumber(Context* ctx, uint64_t number) {
@@ -174,6 +198,8 @@ void print(Context* ctx) {
 	printf(" ");
 	if (ctx->isSigned) printf("S");
 	else printf("U");
+	printf(" ");
+	printFlags(ctx->flags);
 	printf(C_RESET "] ");
 	
 	if (ctx->showLogMode == 1) {
@@ -265,32 +291,34 @@ void setBits(Context* ctx, uint8_t bits, uint8_t preserveSign) {
 
 void performOperation(Context* ctx) {
 	if (ctx->op == OP_ADD)
-		intmath_add(&ctx->mainReg, ctx->inputReg, ctx->bits);
+		intmath_add(&ctx->mainReg, ctx->inputReg, ctx->bits, ctx->flags);
 	else if (ctx->op == OP_SUB)
-		intmath_sub(&ctx->mainReg, ctx->inputReg, ctx->bits);
+		intmath_sub(&ctx->mainReg, ctx->inputReg, ctx->bits, ctx->flags);
 	else if (ctx->op == OP_AND)
-		intmath_and(&ctx->mainReg, ctx->inputReg, ctx->bits);
+		intmath_and(&ctx->mainReg, ctx->inputReg, ctx->bits, ctx->flags);
 	else if (ctx->op == OP_OR)
-		intmath_or(&ctx->mainReg, ctx->inputReg, ctx->bits);
+		intmath_or(&ctx->mainReg, ctx->inputReg, ctx->bits, ctx->flags);
 	else if (ctx->op == OP_XOR)
-		intmath_sub(&ctx->mainReg, ctx->inputReg, ctx->bits);
+		intmath_sub(&ctx->mainReg, ctx->inputReg, ctx->bits, ctx->flags);
 	else if (ctx->op == OP_MUL)
 		intmath_mul(&ctx->mainReg,
 			&ctx->extReg,
 			ctx->inputReg,
 			ctx->isSigned,
-			ctx->bits);
+			ctx->bits,
+			ctx->flags);
 	else if (ctx->op == OP_DIV) {
 		if (ctx->inputReg == 0) return;
 		intmath_div(&ctx->mainReg,
 			&ctx->extReg,
 			ctx->inputReg,
 			ctx->isSigned,
-			ctx->bits);
+			ctx->bits,
+			ctx->flags);
 	} else if (ctx->op == OP_LSH)
-		intmath_lsh(&ctx->mainReg, ctx->inputReg, ctx->bits);
+		intmath_lsh(&ctx->mainReg, ctx->inputReg, ctx->bits, ctx->flags);
 	else if(ctx->op == OP_RSH)
-		intmath_rsh(&ctx->mainReg, ctx->inputReg, ctx->isSigned, ctx->bits);
+		intmath_rsh(&ctx->mainReg, ctx->inputReg, ctx->isSigned, ctx->bits, ctx->flags);
 
 	ctx->inputReg = 0;
 	ctx->op = OP_NONE;
@@ -317,6 +345,9 @@ int main(int argc, char* argv[]) {
 		return 0;
 	}
 
+	// initialize the flags to being undefined
+	Flags flags;
+	clearFlags(&flags);
 
 	// initialize the context
 	Context ctx;
@@ -329,6 +360,7 @@ int main(int argc, char* argv[]) {
 	ctx.op = OP_NONE;
 	ctx.isSigned = 1;
 	ctx.showLogMode = 0;
+	ctx.flags = &flags;
 
 	// initial print
 	print(&ctx);
