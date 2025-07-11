@@ -405,6 +405,7 @@ int main(int argc, char* argv[]) {
 			ctx.inputReg = 0;
 			ctx.extReg = 0;
 			ctx.op = OP_NONE;
+			clearFlags(ctx.flags);
 		}
 
 		// DIGIT GROUPING
