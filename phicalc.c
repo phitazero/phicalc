@@ -133,7 +133,7 @@ void printNumber(Context* ctx, uint64_t number) {
 
 	uint8_t n_digits = ceil(ctx->bits * log(2) / log(ctx->base));
 
-	uint8_t groupSize;
+	uint8_t groupSize = 1;
 	if (ctx->base == 2) {
 		groupSize = 4;
 	} else if (ctx->base == 10) {
@@ -442,7 +442,7 @@ int main(int argc, char* argv[]) {
 			performOperation(&ctx);
 
 		// DIGIT INPUT
-		else if ('0' <= input && input <= '9' || 'a' <= input && input <= 'f') {
+		else if (('0' <= input && input <= '9') || ('a' <= input && input <= 'f')) {
 			uint8_t value = digit2Value(input);
 			if (value >= ctx.base) continue;
 			if (ctx.op == OP_NONE) addDigit(&ctx, &ctx.mainReg, value);
