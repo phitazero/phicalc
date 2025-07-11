@@ -36,7 +36,19 @@ dumpFlags:              ; passed: r8: &flags, r9: flagMask, pushf'd flags
 	.l3:
 	ret 8
 
+dumpFlagsAfterShift:    ; passed: rdx: &flags, cl: n, pushf'd flags
+	mov r9, 0b0111      ; SF, ZF, CF are affected
 
+	; if n == 1 then OF is affected too
+	cmp cl, 1
+	jne .l0
+	or r9, 0b1000
+
+	.l0:
+	mov r8, rdx
+	push qword [rsp + 8]
+	call dumpFlags
+	ret 8
 
 global addBB
 addBB:                  ; passed: &mainReg, inputReg, &flags
@@ -462,78 +474,102 @@ xorQQ:                  ; passed: &mainReg, inputReg, &flags
 
 
 global shlBB
-shlBB:                  ; passed: &mainReg, n
+shlBB:                  ; passed: &mainReg, n, &flags
 	mov cl, sil         ; cl = n
 	shl byte [rdi], cl  ; mainReg <<= n
+	pushf
+	call dumpFlagsAfterShift
 	ret
 
 global shlWW
-shlWW:                  ; passed: &mainReg, n
+shlWW:                  ; passed: &mainReg, n, &flags
 	mov cl, sil         ; cl = n
 	shl word [rdi], cl  ; mainReg <<= n
+	pushf
+	call dumpFlagsAfterShift
 	ret
 
 global shlDD
-shlDD:                  ; passed: &mainReg, n
+shlDD:                  ; passed: &mainReg, n, &flags
 	mov cl, sil         ; cl = n
 	shl dword [rdi], cl ; mainReg <<= n
+	pushf
+	call dumpFlagsAfterShift
 	ret
 
 global shlQQ
-shlQQ:                  ; passed: &mainReg, n
+shlQQ:                  ; passed: &mainReg, n, &flags
 	mov cl, sil         ; cl = n
 	shl qword [rdi], cl ; mainReg <<= n
+	pushf
+	call dumpFlagsAfterShift
 	ret
 
 
 
 
 global shrBB
-shrBB:                  ; passed: &mainReg, n
+shrBB:                  ; passed: &mainReg, n, &flags
 	mov cl, sil         ; cl = n
 	shr byte [rdi], cl  ; mainReg >>= n (logical)
+	pushf
+	call dumpFlagsAfterShift
 	ret
 
 global shrWW
-shrWW:                  ; passed: &mainReg, n
+shrWW:                  ; passed: &mainReg, n, &flags
 	mov cl, sil         ; cl = n
 	shr word [rdi], cl  ; mainReg >>= n (logical)
+	pushf
+	call dumpFlagsAfterShift
 	ret
 
 global shrDD
-shrDD:                  ; passed: &mainReg, n
+shrDD:                  ; passed: &mainReg, n, &flags
 	mov cl, sil         ; cl = n
 	shr dword [rdi], cl ; mainReg >>= n (logical)
+	pushf
+	call dumpFlagsAfterShift
 	ret
 
 global shrQQ
-shrQQ:                  ; passed: &mainReg, n
+shrQQ:                  ; passed: &mainReg, n, &flags
 	mov cl, sil         ; cl = n
 	shr qword [rdi], cl ; mainReg >>= n (logical)
+	pushf
+	call dumpFlagsAfterShift
 	ret
 
 
 
 global sarBB
-sarBB:                  ; passed: &mainReg, n
+sarBB:                  ; passed: &mainReg, n, &flags
 	mov cl, sil         ; cl = n
 	sar byte [rdi], cl  ; mainReg >>= n (arithmetic)
+	pushf
+	call dumpFlagsAfterShift
 	ret
 
 global sarWW
-sarWW:                  ; passed: &mainReg, n
+sarWW:                  ; passed: &mainReg, n, &flags
 	mov cl, sil         ; cl = n
 	sar word [rdi], cl  ; mainReg >>= n (arithmetic)
+	pushf
+	call dumpFlagsAfterShift
 	ret
 
 global sarDD
-sarDD:                  ; passed: &mainReg, n
+sarDD:                  ; passed: &mainReg, n, &flags
 	mov cl, sil         ; cl = n
 	sar dword [rdi], cl ; mainReg >>= n (arithmetic)
+	pushf
+	call dumpFlagsAfterShift
 	ret
 
 global sarQQ
-sarQQ:                  ; passed: &mainReg, n
+sarQQ:                  ; passed: &mainReg, n, &flags
 	mov cl, sil         ; cl = n
 	sar qword [rdi], cl ; mainReg >>= n (arithmetic)
+	pushf
+	call dumpFlagsAfterShift
 	ret
