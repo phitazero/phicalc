@@ -1,53 +1,138 @@
 section .text
 
+dumpFlags:              ; passed: r8: &flags, r9: flagMask, pushf'd flags
+	mov r10, [rsp + 8]
+
+	; set all flags to undefined
+	mov dword [r8], -1
+
+	test r9, 1
+	jz .l0
+
+	bt r10, 7
+	setc [r8]
+
+	.l0:
+	test r9, 2
+	jz .l1
+
+	bt r10, 6
+	setc [r8 + 1]
+
+	.l1:
+	test r9, 4
+	jz .l2
+
+	bt r10, 0
+	setc [r8 + 2]
+
+	.l2:
+	test r9, 8
+	jz .l3
+
+	bt r10, 11
+	setc [r8 + 3]
+
+	.l3:
+	ret 8
+
+
 
 global addBB
-addBB:                  ; passed: &mainReg, inputReg
+addBB:                  ; passed: &mainReg, inputReg, &flags
 	add [rdi], sil      ; mainReg += inputReg
+
+	mov r8, rdx
+	mov r9, 0b1111      ; all flags affected
+	pushf
+	call dumpFlags
+
 	ret
 
 global addWW
-addWW:                  ; passed: &mainReg, inputReg
+addWW:                  ; passed: &mainReg, inputReg, &flags
 	add [rdi], si       ; mainReg += inputReg
+
+	mov r8, rdx
+	mov r9, 0b1111      ; all flags affected
+	pushf
+	call dumpFlags
+
 	ret
 
 global addDD
-addDD:                  ; passed: &mainReg, inputReg
+addDD:                  ; passed: &mainReg, inputReg, &flags
 	add [rdi], esi      ; mainReg += inputReg
+
+	mov r8, rdx
+	mov r9, 0b1111      ; all flags affected
+	pushf
+	call dumpFlags
+
 	ret
 
 global addQQ
-addQQ:                  ; passed: &mainReg, inputReg
+addQQ:                  ; passed: &mainReg, inputReg, &flags
 	add [rdi], rsi      ; mainReg += inputReg
+
+	mov r8, rdx
+	mov r9, 0b1111      ; all flags affected
+	pushf
+	call dumpFlags
+
 	ret
 
 
 
 global subBB
-subBB:                  ; passed: &mainReg, inputReg
+subBB:                  ; passed: &mainReg, inputReg, &flags
 	sub [rdi], sil      ; mainReg -= inputReg
+
+	mov r8, rdx
+	mov r9, 0b1111      ; all flags affected
+	pushf
+	call dumpFlags
+
 	ret
 
 global subWW
-subWW:                  ; passed: &mainReg, inputReg
+subWW:                  ; passed: &mainReg, inputReg, &flags
 	sub [rdi], si       ; mainReg -= inputReg
+
+	mov r8, rdx
+	mov r9, 0b1111      ; all flags affected
+	pushf
+	call dumpFlags
+
 	ret
 
 global subDD
-subDD:                  ; passed: &mainReg, inputReg
+subDD:                  ; passed: &mainReg, inputReg, &flags
 	sub [rdi], esi      ; mainReg -= inputReg
+
+	mov r8, rdx
+	mov r9, 0b1111      ; all flags affected
+	pushf
+	call dumpFlags
+
 	ret
 
 global subQQ
-subQQ:                  ; passed: &mainReg, inputReg
+subQQ:                  ; passed: &mainReg, inputReg, &flags
 	sub [rdi], rsi      ; mainReg -= inputReg
+
+	mov r8, rdx
+	mov r9, 0b1111      ; all flags affected
+	pushf
+	call dumpFlags
+
 	ret
 
 
 
 
 global mulBB
-mulBB:                  ; passed: &lo, &hi, n, isSigned
+mulBB:                  ; passed: &lo, &hi, n, isSigned, &flags
 	mov al, [rdi]       ; al = lo
 
 	; ex:ax = ax * n
@@ -59,12 +144,17 @@ mulBB:                  ; passed: &lo, &hi, n, isSigned
 	imul dl
 	.l1:
 
+	; r8 already points to Flags
+	mov r9, 0b1100      ; CF and OF are affected
+	pushf
+	call dumpFlags
+
 	mov [rdi], al       ; lo = al
 	mov [rsi], ah       ; hi = ah
 	ret
 
 global mulWW
-mulWW:                  ; passed: &lo, &hi, n, isSigned
+mulWW:                  ; passed: &lo, &hi, n, isSigned, &flags
 	mov ax, [rdi]       ; ax = lo
 
 	; ex:ax = ax * n
@@ -76,22 +166,32 @@ mulWW:                  ; passed: &lo, &hi, n, isSigned
 	imul dx
 	.l1:
 
+	; r8 already points to Flags
+	mov r9, 0b1100      ; CF and OF are affected
+	pushf
+	call dumpFlags
+
 	mov [rdi], ax       ; lo = ax
 	mov [rsi], dx       ; hi = dx
 	ret
 
 global mulDD
-mulDD:                  ; passed: &lo, &hi, n, isSigned
+mulDD:                  ; passed: &lo, &hi, n, isSigned, &flags
 	mov eax, [rdi]      ; eax = lo
 
 	; edx:eax = eax * n
 	test cl, cl
 	jnz .l0             ; if isSigned do imul
 	mul edx             ; else do mul
-	jmp .l1
+	jmp .l1 
 	.l0:
 	imul edx
 	.l1:
+
+	; r8 already points to Flags
+	mov r9, 0b1100      ; CF and OF are affected
+	pushf
+	call dumpFlags
 
 	mov [rdi], eax      ; lo = eax
 	mov [rsi], edx      ; hi = edx
@@ -99,7 +199,7 @@ mulDD:                  ; passed: &lo, &hi, n, isSigned
 
 
 global mulQQ
-mulQQ:                  ; passed: &lo, &hi, n, isSigned
+mulQQ:                  ; passed: &lo, &hi, n, isSigned, &flags
 	mov rax, [rdi]      ; rax = lo
 
 	; rdx:rax = rax * n
@@ -111,6 +211,11 @@ mulQQ:                  ; passed: &lo, &hi, n, isSigned
 	imul rdx
 	.l1:
 
+	; r8 already points to Flags
+	mov r9, 0b1100      ; CF and OF are affected
+	pushf
+	call dumpFlags
+
 	mov [rdi], rax      ; lo = rax
 	mov [rsi], rdx      ; hi = rdx
 	ret
@@ -118,7 +223,7 @@ mulQQ:                  ; passed: &lo, &hi, n, isSigned
 
 
 global divBB
-divBB:                  ; passed: &lo, &hi, n, isSigned
+divBB:                  ; passed: &lo, &hi, n, isSigned, &flags
 	; copying the divisor to r11 isn't neccessary for byte arguments
 	; but is kept for consistency
 
@@ -135,12 +240,17 @@ divBB:                  ; passed: &lo, &hi, n, isSigned
 	idiv r11b
 	.l1:
 
+	; r8 already points to Flags
+	xor r9, r9          ; no flags are affected
+	pushf
+	call dumpFlags
+
 	mov [rdi], al       ; lo = al (quotient)
 	mov [rsi], ah       ; hi = ah (remainder)
 	ret
 
 global divWW
-divWW:                  ; passed: &lo, &hi, n, isSigned
+divWW:                  ; passed: &lo, &hi, n, isSigned, &flags
 	mov r11w, dx        ; r11w = n
 	mov ax, [rdi]       ; ax = lo
 
@@ -154,12 +264,17 @@ divWW:                  ; passed: &lo, &hi, n, isSigned
 	idiv r11w
 	.l1:
 
+	; r8 already points to Flags
+	xor r9, r9          ; no flags are affected
+	pushf
+	call dumpFlags
+
 	mov [rdi], ax       ; lo = ax (quotient)
 	mov [rsi], dx       ; hi = dx (remainder)
 	ret
 
 global divDD
-divDD:                  ; passed: &lo, &hi, n, isSigned
+divDD:                  ; passed: &lo, &hi, n, isSigned, &flags
 	mov r11d, edx       ; r11d = n
 	mov eax, [rdi]      ; eax = lo
 
@@ -173,12 +288,17 @@ divDD:                  ; passed: &lo, &hi, n, isSigned
 	idiv r11d
 	.l1:
 
+	; r8 already points to Flags
+	xor r9, r9          ; no flags are affected
+	pushf
+	call dumpFlags
+
 	mov [rdi], eax      ; lo = eax (quotient)
 	mov [rsi], edx      ; hi = edx (remainder)
 	ret
 
 global divQQ
-divQQ:                  ; passed: &lo, &hi, n, isSigned
+divQQ:                  ; passed: &lo, &hi, n, isSigned, &flags
 	mov r11, rdx        ; r11 = n
 	mov rax, [rdi]      ; rax = lo
 
@@ -192,6 +312,11 @@ divQQ:                  ; passed: &lo, &hi, n, isSigned
 	idiv r11
 	.l1:
 
+	; r8 already points to Flags
+	xor r9, r9          ; no flags are affected
+	pushf
+	call dumpFlags
+
 	mov [rdi], rax      ; lo = rax (quotient)
 	mov [rsi], rdx      ; hi = rdx (remainder)
 	ret
@@ -199,67 +324,139 @@ divQQ:                  ; passed: &lo, &hi, n, isSigned
 
 
 global andBB
-andBB:                  ; passed: &mainReg, inputReg
+andBB:                  ; passed: &mainReg, inputReg, &flags
 	and [rdi], sil      ; mainReg &= inputReg
+
+	mov r8, rdx
+	mov r9, 0b1111      ; all flags affected
+	pushf
+	call dumpFlags
+
 	ret
 
 global andWW
-andWW:                  ; passed: &mainReg, inputReg
+andWW:                  ; passed: &mainReg, inputReg, &flags
 	and [rdi], si       ; mainReg &= inputReg
+
+	mov r8, rdx
+	mov r9, 0b1111      ; all flags affected
+	pushf
+	call dumpFlags
+
 	ret
 
 global andDD
-andDD:                  ; passed: &mainReg, inputReg
+andDD:                  ; passed: &mainReg, inputReg, &flags
 	and [rdi], esi      ; mainReg &= inputReg
+
+	mov r8, rdx
+	mov r9, 0b1111      ; all flags affected
+	pushf
+	call dumpFlags
+
 	ret
 
 global andQQ
-andQQ:                  ; passed: &mainReg, inputReg
+andQQ:                  ; passed: &mainReg, inputReg, &flags
 	and [rdi], rsi      ; mainReg &= inputReg
+
+	mov r8, rdx
+	mov r9, 0b1111      ; all flags affected
+	pushf
+	call dumpFlags
+
 	ret
 
 
 
 global orBB
-orBB:                   ; passed: &mainReg, inputReg
+orBB:                   ; passed: &mainReg, inputReg, &flags
 	or [rdi], sil       ; mainReg |= inputReg
+
+	mov r8, rdx
+	mov r9, 0b1111      ; all flags affected
+	pushf
+	call dumpFlags
+
 	ret
 
 global orWW
-orWW:                   ; passed: &mainReg, inputReg
+orWW:                   ; passed: &mainReg, inputReg, &flags
 	or [rdi], si        ; mainReg |= inputReg
+
+	mov r8, rdx
+	mov r9, 0b1111      ; all flags affected
+	pushf
+	call dumpFlags
+
 	ret
 
 global orDD
-orDD:                   ; passed: &mainReg, inputReg
+orDD:                   ; passed: &mainReg, inputReg, &flags
 	or [rdi], esi       ; mainReg |= inputReg
+
+	mov r8, rdx
+	mov r9, 0b1111      ; all flags affected
+	pushf
+	call dumpFlags
+
 	ret
 
 global orQQ
-orQQ:                   ; passed: &mainReg, inputReg
+orQQ:                   ; passed: &mainReg, inputReg, &flags
 	or [rdi], rsi       ; mainReg |= inputReg
+
+	mov r8, rdx
+	mov r9, 0b1111      ; all flags affected
+	pushf
+	call dumpFlags
+
 	ret
 
 
 
 global xorBB
-xorBB:                  ; passed: &mainReg, inputReg
+xorBB:                  ; passed: &mainReg, inputReg, &flags
 	xor [rdi], sil      ; mainReg ^= inputReg
+
+	mov r8, rdx
+	mov r9, 0b1111      ; all flags affected
+	pushf
+	call dumpFlags
+
 	ret
 
 global xorWW
-xorWW:                  ; passed: &mainReg, inputReg
+xorWW:                  ; passed: &mainReg, inputReg, &flags
 	xor [rdi], si       ; mainReg ^= inputReg
+
+	mov r8, rdx
+	mov r9, 0b1111      ; all flags affected
+	pushf
+	call dumpFlags
+
 	ret
 
 global xorDD
-xorDD:                  ; passed: &mainReg, inputReg
+xorDD:                  ; passed: &mainReg, inputReg, &flags
 	xor [rdi], esi      ; mainReg ^= inputReg
+
+	mov r8, rdx
+	mov r9, 0b1111      ; all flags affected
+	pushf
+	call dumpFlags
+
 	ret
 
 global xorQQ
-xorQQ:                  ; passed: &mainReg, inputReg
+xorQQ:                  ; passed: &mainReg, inputReg, &flags
 	xor [rdi], rsi      ; mainReg ^= inputReg
+
+	mov r8, rdx
+	mov r9, 0b1111      ; all flags affected
+	pushf
+	call dumpFlags
+
 	ret
 
 
