@@ -52,7 +52,7 @@ else:
 print("Checking sources... ", end="")
 
 sourcesFound = Popen(
-	("ls", "phicalc.c", "intmath.h", "math.asm", "keybinds.json"),
+	("ls", "phicalc.c", "intmath.h", "math.asm", "keybinds.json", "colors.h"),
 	stdout=DEVNULL
 ).wait() == 0
 
@@ -90,7 +90,7 @@ open("keybinds_temp.h", "w").write(codeTemplate.format(definitions, helpText))
 print("Assembling math.asm...")
 run(("nasm", "math.asm", "-f", "elf64", "-o", "math.o"))
 print("Compiling phicalc.c, linking with math.o...")
-run((compiler, "phicalc.c", "math.o", "-o", "phicalc", "-lm", "-O2", "-Wall"))
+run((compiler, "phicalc.c", "math.o", "colors.h", "-o", "phicalc", "-lm", "-O2", "-Wall"))
 
 if "-t" not in argv:
 	print("Cleaning up...")
