@@ -7,6 +7,7 @@
 #include "keybinds_temp.h"
 #include "intmath.h"
 #include "flags.h"
+#include "colors.h"
 
 // OPERATIONS
 #define OP_NONE 0
@@ -19,12 +20,6 @@
 #define OP_XOR 7
 #define OP_LSH 8
 #define OP_RSH 9
-
-// COLORS
-#define C_MAGENTA "\033[35m"
-#define C_LMAGENTA "\033[95m"
-#define C_LBLACK "\033[90m"
-#define C_RESET "\033[0m"
 
 #define ALL_ONES 0xFFFFFFFFFFFFFFFF
 
@@ -102,8 +97,8 @@ void clearLine() {
 }
 
 void printFlag(int8_t value, char flagLetter) {
-	if (value == 1) printf(C_LMAGENTA);
-	else printf(C_LBLACK);
+	if (value == 1) printf(C_FLAG_SET);
+	else printf(C_FLAG_UNSET);
 
 	if (value != -1) printf("%c", flagLetter);
 	else printf("-");
@@ -126,10 +121,10 @@ void clearFlags(Flags* flags) {
 void printNumber(Context* ctx, uint64_t number) {
 	if (ctx->base == 10 && isSignedAndNegative(ctx, number)) {
 		negate(ctx, &number);
-		printf("-");
+		printf(C_OPERATORS"-");
 	}
 
-	printf(C_LBLACK);
+	printf(C_LEADING_ZEROS);
 
 	uint8_t n_digits = ceil(ctx->bits * log(2) / log(ctx->base));
 
@@ -144,7 +139,7 @@ void printNumber(Context* ctx, uint64_t number) {
 
 	for (int pos = n_digits - 1; pos >= 0; pos--) {
 		char value = getValueAtPosition(number, pos, ctx->base);
-		if (value) printf(C_LMAGENTA);
+		if (value) printf(C_DIGITS);
 
 		char digit = value2Digit(value);
 		printf("%c", digit);
@@ -188,26 +183,26 @@ void printBase(uint8_t base) {
 // prints the info and all numbers
 void print(Context* ctx) {
 	clearLine();
-	printf("[" C_MAGENTA);
+	printf(C_BRACKETS"["C_BITNESS);
 	if (ctx->bits == 8) printf("BYTE");
 	else if (ctx->bits == 16) printf("WORD");
 	else if (ctx->bits == 32) printf("DWORD");
 	else if (ctx->bits == 64) printf("QWORD");
-	printf(" ");
+	printf(" "C_BASE);
 	printBase(ctx->base);
-	printf(" ");
+	printf(" "C_SIGNEDNESS);
 	if (ctx->isSigned) printf("S");
 	else printf("U");
 	printf(" ");
 	printFlags(ctx->flags);
-	printf(C_RESET "] ");
+	printf(C_BRACKETS"] ");
 	
 	if (ctx->showLogMode == 1) {
 		float log = log2(ctx->mainReg);
 		log *= 10;
 		log = (float) floor(log);
 		log /= 10;
-		printf(C_MAGENTA"(log2 = %.1f) "C_RESET, log);
+		printf(C_LOG"(log2 = %.1f) ", log);
 	} else if (ctx->showLogMode == 2) {
 		uint8_t n_bits;
 
@@ -216,21 +211,21 @@ void print(Context* ctx) {
 			n_bits = floor(log2(ctx->mainReg)) + 1;
 		}
 
-		printf(C_MAGENTA"(%d bits) "C_RESET, n_bits);
+		printf(C_LOG"(%d bits) ", n_bits);
 	}
 
 	printf(" ");
 
 	if (ctx->extReg != 0) {
 		printNumber(ctx, ctx->extReg);
-		printf(":");
+		printf(C_OPERATORS":");
 	}
 
 	printNumber(ctx, ctx->mainReg);
 
 	if (ctx->op == OP_NONE) return;
 
-	printf(" ");
+	printf(" "C_OPERATORS);
 	printOp(ctx->op);
 	printf(" ");
 
