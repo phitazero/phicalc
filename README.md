@@ -20,6 +20,7 @@ To build:
 - Supports viewing bit count and log2
 - Full keyboard control, configurable via `keybinds.json`
 - Access to CPU flags (SF, ZF, CF, OF) after operations
+- Customizable color scheme via `colors.h`
 
 ## How to build
 Clone the code:
@@ -108,7 +109,11 @@ Default keybinds:
 | L         | Toggle bit count and log2 view                         |
 | X         | Exit                                                   |
 
+### Colors
+The color scheme be edited in `colors.h`. Each color is an ANSI color code.
+
 ## Examples
+All of the following examples use the default color scheme.
 Default state:
 ![[DWORD DEC S ----]  0000000000](images/example1.png)
 
