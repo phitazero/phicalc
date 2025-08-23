@@ -113,7 +113,7 @@ Default keybinds:
 The color scheme be edited in `colors.h`. Each color is an ANSI color code.
 
 ## Examples
-All of the following examples use the default color scheme.
+All of the following examples use the default color scheme.  
 Default state:
 ![[DWORD DEC S ----]  0000000000](images/example1.png)
 
