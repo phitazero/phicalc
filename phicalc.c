@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include "keybinds_temp.h"
 #include "intmath.h"
@@ -333,13 +334,47 @@ void printHelp() {
 	printKeybinds(); // from keybinds_temp.h
 }
 
-int main(int argc, char* argv[]) {
-	// if -h or --help is passed
-	if (argc >= 2 && !(strcmp(argv[1], "-h") && strcmp(argv[1], "--help"))) {
+void processArg(Context* ctx, char* arg) {
+	if (!strcmp(arg, "-h") || !strcmp(arg, "--help")) {
 		printHelp();
-		return 0;
-	}
+		exit(0);
+	} else if (arg[0] == 'b') {
+		char* baseStr = arg + 1;
+		uint8_t base = atoi(baseStr);
 
+		if (base < 2 || base > 16) {
+			puts("Invalid base. Only bases between 2 and 16 (inclusively) are allowed.");
+			exit(1);
+		}
+
+		ctx->base = base;
+	} else if (arg[0] == 's' || arg[0] == 'i' || arg[0] == 'u') {
+		ctx->isSigned = arg[0] != 'u';
+
+		char* bitsStr = arg + 1;
+		uint8_t bits = atoi(bitsStr);
+
+		switch (bits) {
+			case 8:
+			case 16:
+			case 32:
+			case 64:
+			break;
+
+			default:
+
+			puts("Invalid bitness. Valid bitnesses: 8, 16, 32, 64.");
+			exit(2);
+		}
+
+		ctx->bits = bits;
+
+	} else {
+		printf("Unknown option: %c\n", arg[0]);
+	}
+}
+
+int main(int argc, char* argv[]) {
 	// initialize the flags to being undefined
 	Flags flags;
 	clearFlags(&flags);
@@ -356,6 +391,9 @@ int main(int argc, char* argv[]) {
 	ctx.isSigned = 1;
 	ctx.showLogMode = 0;
 	ctx.flags = &flags;
+
+	for (uint8_t i = 1; i < argc; i++)
+		processArg(&ctx, argv[i]);
 
 	// initial print
 	print(&ctx);
