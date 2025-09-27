@@ -109,6 +109,17 @@ Default keybinds:
 | L         | Toggle bit count and log2 view                         |
 | X         | Exit                                                   |
 
+### Command line arguments
+You can set the base, bitness and signedness when launching with command line arguments. 
+ 
+Base - the base (2-16 inclusively), prefixed with a `b`. E. g.: binary - `b2`, ternary - `b3`, hexadecimal - `b16`  
+Bitness and signedness - the bitness (8, 16, 32 or 64), prefixed with `i` or `s` (signed), or `u` (unsigned). E. g.: `u32` - unsigned DWORD, `i8` - signed BYTE, `s64` - signed QWORD  
+
+Examples:  
+`phicalc u8 b2` - unsigned BYTE in binary  
+`phicalc b16` - hexadecimal, keep bitness and signedness default  
+`phicalc u64` - unsigned QWORD, keep base default
+
 ### Colors
 The color scheme be edited in `colors.h`. Each color is an ANSI color code.
 
