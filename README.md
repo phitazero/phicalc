@@ -16,7 +16,7 @@ To build:
 - Supports bases: every base 2 - 16
 - Configurable bitness: 8, 16, 32, 64 bits
 - Signed and unsigned modes
-- Logical/bitwise operators: AND, OR, XOR, shifts
+- Logical/bitwise operators: NOT, AND, OR, XOR, shifts
 - Supports viewing bit count and log2
 - Full keyboard control, configurable via `keybinds.json`
 - Access to CPU flags (SF, ZF, CF, OF) after operations
@@ -56,20 +56,21 @@ Input register (`input reg`) - shown when an operation is selected. If shown, nu
 Extension register (`ext reg`) - shown only when non-zero. The higher part of the product of a multiplication is put into the `ext reg`. When the bitness is increased the `ext reg` gets merged with the `main reg`
 
 ### Operations
-An operation is selected by pressing the corresponding key. When an operation is selected the `input reg` will appear.
+An operation is selected by pressing the corresponding key (configured in `keybinds.json`). When an operation is selected the `input reg` will appear.
 
 Supported operations:
 
-Addition ( `+` )  
-Subtraction ( `-` )  
-Multiplication ( `*` ) - mode (signed/unsigned) corresponds to the current signedness. The higher half of the product is put into `ext reg`.  
-Floor division ( `/` ) mode (signed/unsigned) corresponds to the current signedness.  
-Bitwise AND ( `&` )  
-Bitwise OR ( `|` )  
-Bitwise XOR ( `^` )  
-Left shift ( `<` )  
-Right logical shift ( `>` ) - if the signedness is unsigned  
-Right arithmetic shift ( `>` ) - if the signedness is signed  
+Addition  
+Subtraction  
+Multiplication - mode (signed/unsigned) corresponds to the current signedness. The higher half of the product is put into `ext reg`.  
+Floor division mode (signed/unsigned) corresponds to the current signedness.  
+Bitwise NOT  
+Bitwise AND  
+Bitwise OR  
+Bitwise XOR  
+Left shift  
+Right logical shift - if the signedness is unsigned  
+Right arithmetic shift - if the signedness is signed  
 
 ### Flags
 Flags SF, ZF, CF, OF are tracked.  
@@ -107,6 +108,16 @@ Default keybinds:
 | D         | Copy the extension register to the main register       |
 | backspace | Erase a digit                                          |
 | L         | Toggle bit count and log2 view                         |
+| +         | Operation: addition                                    |
+| -         | Operation: subtraction                                 |
+| *         | Operation: multiplication                              |
+| /         | Operation: division                                    |
+| ~         | Operation: bitwise NOT                                 |
+| &         | Operation: bitwise AND                                 |
+| \|        | Operation: bitwise OR                                  |
+| ^         | Operation: bitwise XOR                                 |
+| <         | Operation: left shift                                  |
+| >         | Operation: right shift                                 |
 | X         | Exit                                                   |
 
 ### Command line arguments
