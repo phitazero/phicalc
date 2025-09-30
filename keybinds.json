@@ -25,6 +25,7 @@
 	"KEY_SUB": {"key": "-", "desc": "Operation: subtraction"},
 	"KEY_MUL": {"key": "*", "desc": "Operation: multiplication"},
 	"KEY_DIV": {"key": "/", "desc": "Operation: division"},
+	"KEY_NOT": {"key": "~", "desc": "Operation: bitwise NOT"},
 	"KEY_AND": {"key": "&", "desc": "Operation: bitwise AND"},
 	"KEY_OR": {"key": "|", "desc": "Operation: bitwise OR"},
 	"KEY_XOR": {"key": "^", "desc": "Operation: bitwise XOR"},

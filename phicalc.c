@@ -471,6 +471,9 @@ int main(int argc, char* argv[]) {
 		else if (input == KEY_LSH) ctx.op = OP_LSH;
 		else if (input == KEY_RSH) ctx.op = OP_RSH;
 		
+		// BITWISE NOT
+		else if (input == KEY_NOT) intmath_not(&ctx.mainReg, ctx.bits, ctx.flags);
+
 		// PERFORM AN OPERATION
 		else if (ctx.op != OP_NONE && input == KEY_ENTER)
 			performOperation(&ctx);

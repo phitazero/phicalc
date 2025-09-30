@@ -50,6 +50,54 @@ dumpFlagsAfterShift:    ; passed: rdx: &flags, cl: n, pushf'd flags
 	call dumpFlags
 	ret 8
 
+; technically since NOT's are easy to implement in C and don't affect flags
+; ...assembly is not required, and i could've written them in C, but
+; ...they'll feel lonely in intmath.h, away from other function so they're here
+global notB
+notB:                   ; passed: &mainReg, &flags
+	not byte [rdi]
+
+	mov r8, rsi
+	xor r9, r9          ; no flags affected
+	pushf
+	call dumpFlags
+
+	ret
+
+global notW
+notW:                   ; passed: &mainReg, &flags
+	not word [rdi]
+
+	mov r8, rsi
+	xor r9, r9          ; no flags affected
+	pushf
+	call dumpFlags
+
+	ret
+
+global notD
+notD:                   ; passed: &mainReg, &flags
+	not dword [rdi]
+
+	mov r8, rsi
+	xor r9, r9          ; no flags affected
+	pushf
+	call dumpFlags
+
+	ret
+
+
+global notQ
+notQ:                   ; passed: &mainReg, &flags
+	not qword [rdi]
+
+	mov r8, rsi
+	xor r9, r9          ; no flags affected
+	pushf
+	call dumpFlags
+
+	ret
+
 global addBB
 addBB:                  ; passed: &mainReg, inputReg, &flags
 	add [rdi], sil      ; mainReg += inputReg

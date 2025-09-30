@@ -1,6 +1,11 @@
 #include <stdint.h>
 #include "flags.h"
 
+extern void notB(uint64_t* io_operand, Flags* flags);
+extern void notW(uint64_t* io_operand, Flags* flags);
+extern void notD(uint64_t* io_operand, Flags* flags);
+extern void notQ(uint64_t* io_operand, Flags* flags);
+
 extern void addBB(uint64_t* io_operand1, uint64_t operand2, Flags* flags);
 extern void addWW(uint64_t* io_operand1, uint64_t operand2, Flags* flags);
 extern void addDD(uint64_t* io_operand1, uint64_t operand2, Flags* flags);
@@ -51,6 +56,16 @@ extern void sarWW(uint64_t* io_operand1, uint64_t n, Flags* flags);
 extern void sarDD(uint64_t* io_operand1, uint64_t n, Flags* flags);
 extern void sarQQ(uint64_t* io_operand1, uint64_t n, Flags* flags);
 
+void intmath_not(uint64_t* io_operand, uint8_t bits, Flags* flags) {
+	if (bits == 8)
+		notB(io_operand, flags);
+	else if (bits == 16)
+		notW(io_operand, flags);
+	else if (bits == 32)
+		notD(io_operand, flags);
+	else
+		notQ(io_operand, flags);
+}
 
 void intmath_add(uint64_t* io_operand1, uint64_t operand2, uint8_t bits, Flags* flags) {
 	if (bits == 8)
