@@ -295,7 +295,7 @@ void performOperation(Context* ctx) {
 	else if (ctx->op == OP_OR)
 		intmath_or(&ctx->mainReg, ctx->inputReg, ctx->bits, ctx->flags);
 	else if (ctx->op == OP_XOR)
-		intmath_sub(&ctx->mainReg, ctx->inputReg, ctx->bits, ctx->flags);
+		intmath_xor(&ctx->mainReg, ctx->inputReg, ctx->bits, ctx->flags);
 	else if (ctx->op == OP_MUL)
 		intmath_mul(&ctx->mainReg,
 			&ctx->extReg,
