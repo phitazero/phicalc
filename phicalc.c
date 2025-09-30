@@ -461,15 +461,15 @@ int main(int argc, char* argv[]) {
 		else if (input == KEY_TO_QWORD_PS && ctx.op == OP_NONE) setBits(&ctx, 64, 1);
 
 		// OPERATIONS
-		else if (input == '+') ctx.op = OP_ADD;
-		else if (input == '-') ctx.op = OP_SUB;
-		else if (input == '*') ctx.op = OP_MUL;
-		else if (input == '/') ctx.op = OP_DIV;
-		else if (input == '&') ctx.op = OP_AND;
-		else if (input == '|') ctx.op = OP_OR;
-		else if (input == '^') ctx.op = OP_XOR;
-		else if (input == '<') ctx.op = OP_LSH;
-		else if (input == '>') ctx.op = OP_RSH;
+		else if (input == KEY_ADD) ctx.op = OP_ADD;
+		else if (input == KEY_SUB) ctx.op = OP_SUB;
+		else if (input == KEY_MUL) ctx.op = OP_MUL;
+		else if (input == KEY_DIV) ctx.op = OP_DIV;
+		else if (input == KEY_AND) ctx.op = OP_AND;
+		else if (input == KEY_OR) ctx.op = OP_OR;
+		else if (input == KEY_XOR) ctx.op = OP_XOR;
+		else if (input == KEY_LSH) ctx.op = OP_LSH;
+		else if (input == KEY_RSH) ctx.op = OP_RSH;
 		
 		// PERFORM AN OPERATION
 		else if (ctx.op != OP_NONE && input == KEY_ENTER)

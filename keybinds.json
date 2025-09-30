@@ -21,5 +21,14 @@
 	"KEY_COPY_EXT2NUM": {"key": "D", "desc": "Copy the extension register to the main register"},
 	"KEY_ERASE": {"key": 127, "desc": "Erase a digit", "alias": "backspace"},
 	"KEY_LOGARITHM": {"key": "L", "desc": "Toggle bit count and log2 view"},
+	"KEY_ADD": {"key": "+", "desc": "Operation: addition"},
+	"KEY_SUB": {"key": "-", "desc": "Operation: subtraction"},
+	"KEY_MUL": {"key": "*", "desc": "Operation: multiplication"},
+	"KEY_DIV": {"key": "/", "desc": "Operation: division"},
+	"KEY_AND": {"key": "&", "desc": "Operation: bitwise AND"},
+	"KEY_OR": {"key": "|", "desc": "Operation: bitwise OR"},
+	"KEY_XOR": {"key": "^", "desc": "Operation: bitwise XOR"},
+	"KEY_LSH": {"key": "<", "desc": "Operation: left shift"},
+	"KEY_RSH": {"key": ">", "desc": "Operation: right shift"},
 	"KEY_EXIT": {"key": "X", "desc": "Exit"}
 }
