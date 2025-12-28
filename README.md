@@ -8,7 +8,7 @@ To run:
 
 To build:
 - GCC or Clang
-- NASM
+- FASM
 - Python 3
 
 ## Features
