@@ -21,8 +21,8 @@ def isInstalled(prog):
 	print("Found" if found else "Not found")
 	return found
 
-if not isInstalled("nasm"):
-	print("Fatal: nasm not found")
+if not isInstalled("fasm"):
+	print("Fatal: fasm not found")
 	exit(1)
 
 gccInstalled = isInstalled("gcc")
@@ -88,7 +88,7 @@ print("Creating keybinds_temp.h...")
 open("keybinds_temp.h", "w").write(codeTemplate.format(definitions, helpText))
 
 print("Assembling math.asm...")
-run(("nasm", "math.asm", "-f", "elf64", "-o", "math.o"))
+run(("fasm", "math.asm", "math.o"))
 print("Compiling phicalc.c, linking with math.o...")
 run((compiler, "phicalc.c", "math.o", "-o", "phicalc", "-lm", "-O2", "-Wall"))
 
