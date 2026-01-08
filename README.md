@@ -49,9 +49,9 @@ Run with the `-h` or `--help` flag to get current keybinds.
 ### Registers
 Registers (or `regs`) - integer variables of different purposes. Have variable size, here referred to as 'bitness'.
 
-Main register (`main reg`) - always shown, stores the results of all operations and acts as the first operand. If no operation is selected, numbers are entered into the `main reg`.
+Main register (`main reg`) - always shown, stores the results of all operations and acts as the first operand. If no operation is selected, digits are entered into the `main reg`.
 
-Input register (`input reg`) - shown when an operation is selected. If shown, numbers are entered into the `input reg`.
+Input register (`input reg`) - shown when an operation is selected. If shown, digits are entered into the `input reg`.
 
 Extension register (`ext reg`) - shown only when non-zero. The higher part of the product of a multiplication is put into the `ext reg`. When the bitness is increased the `ext reg` gets merged with the `main reg`
 
